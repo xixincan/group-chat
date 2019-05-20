@@ -1,0 +1,22 @@
+/target/
+.settings/
+.classpath
+.project
+/logs/
+build/
+classes/
+.idea
+*.iml
+*.ipr
+*.iws
+.project
+.settings
+.classpath
+*/target/
+target/
+
+### IntelliJ IDEA ###
+*/.idea
+*/*.iws
+*/*.iml
+*/*.ipr

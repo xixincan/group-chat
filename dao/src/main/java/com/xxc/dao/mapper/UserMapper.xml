@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxc.dao.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="com.xxc.dao.model.User">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="age" jdbcType="SMALLINT" property="age" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="updated" jdbcType="BIGINT" property="updated" />
+    <result column="created" jdbcType="BIGINT" property="created" />
+  </resultMap>
+</mapper>

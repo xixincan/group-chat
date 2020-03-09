@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/x-icon" href="/static/favicon1.ico">
+    <title>xxc-群聊系统</title>
+</head>
+<script>
+    var socket;
+    //判断当前浏览器是否支持websocket
+    if (window.WebSocket) {
+        socket = new WebSocket("ws://127.0.0.1:7000/groupchat");
+        //相当于channel read0()， ev 收到服务器端回送的消息
+        socket.onmessage = function (ev) {
+            var rt = document.getElementById("responseText");
+            rt.value = rt.value + "\n" + ev.data;
+        }
+
+        //相当于连接开启
+        socket.onopen = function (ev) {
+            var rt = document.getElementById("status");
+            rt.value = "";
+            rt.value = "..连接成功...";
+        }
+
+        //相当于连接关闭
+        socket.onclose = function (ev) {
+            var rt = document.getElementById("status");
+            rt.value = "";
+            rt.value = rt.value + "\n" + "..连接关闭..";
+        }
+
+    } else {
+        alert("当前 浏览器不支持Websocket");
+    }
+
+    function send(msg) {
+        if (!window.socket) {
+            return;
+        }
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(msg);
+            document.getElementById("sendText").value = "";
+        } else {
+            alert("连接没有开启")
+        }
+    }
+</script>
+<body>
+<form onsubmit="return false">
+    <textarea id="status"
+              style="height: auto; width: 300px; text-align: center;overflow-x:hidden;overflow-y:hidden;resize:none"
+              readonly="readonly"></textarea>
+    <br>
+    <textarea id="responseText" style="height: 300px; width: 300px ;overflow-x:hidden;resize:none"
+              readonly="readonly"></textarea>
+    <input type="button" value="清空内容" onclick="document.getElementById('responseText').value=''">
+    <br>
+    <textarea id="sendText" name="message" style="height: 30px; width: 300px;resize:none"
+              autofocus="autofocus"></textarea>
+    <input type="button" value="发送消息" onclick="send(this.form.message.value)">
+
+</form>
+</body>
+</html>

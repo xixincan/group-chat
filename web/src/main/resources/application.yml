@@ -3,7 +3,7 @@ debug: false
 
 #内置服务器配置
 server:
-  port: 8888
+  port: 8089
   compression:
     enabled: true
     min-response-size: 2048
@@ -20,6 +20,9 @@ logging:
 
 #spring配置
 spring:
+  mvc:
+    favicon:
+      enabled: false
   aop:
     proxy-target-class: true
   datasource:

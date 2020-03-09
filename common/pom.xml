@@ -19,7 +19,13 @@
             <artifactId>entity</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
+        <!--Netty 4-->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <!--netty5版本官方已经废弃，官方继续维护4版本-->
+            <version>4.1.42.Final</version>
+        </dependency>
         <!-- pagehelper依赖 -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>

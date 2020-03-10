@@ -1,5 +1,6 @@
 package com.xxc.common.util;
 
+import cn.hutool.log.StaticLog;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,4 +46,8 @@ public class MyIPUtil {
         return ip;
     }
 
+    public static String getIP(String remoteAddr) {
+        StaticLog.info(remoteAddr);
+        return remoteAddr.substring(1, remoteAddr.indexOf(":"));
+    }
 }

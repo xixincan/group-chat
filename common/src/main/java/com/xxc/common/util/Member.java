@@ -1,9 +1,8 @@
 package com.xxc.common.util;
 
+import cn.hutool.log.StaticLog;
 import com.xxc.entity.exp.AccessException;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,8 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0.0
  */
 public class Member {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Member.class);
 
     public static final Map<String, String> WHITE_MAP = new ConcurrentHashMap<>();
 
@@ -32,13 +29,13 @@ public class Member {
     }
 
     public static String getIP(String remoteAddr) {
-        LOGGER.info(remoteAddr);
+        StaticLog.info(remoteAddr);
         return remoteAddr.substring(1, remoteAddr.indexOf(":"));
     }
 
     public static void checkIP(String ipAddr) {
         if (!WHITE_MAP.keySet().contains(ipAddr)) {
-            LOGGER.error("不在IP白名单内，拒绝访问{}", ipAddr);
+            StaticLog.error("不在IP白名单内，拒绝访问{}", ipAddr);
             throw new AccessException("Access denied.");
         }
     }

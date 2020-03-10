@@ -1,6 +1,8 @@
-package com.xxc.service;
+package com.xxc.core;
 
+import cn.hutool.log.StaticLog;
 import com.xxc.common.util.Member;
+import com.xxc.common.util.MyIPUtil;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -8,24 +10,20 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
-//这里TextWebsocketFram类型，表示一个文本帧（frame）
+@Service
 @ChannelHandler.Sharable
-public class MyTextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MyTextWebsocketFrameHandler.class);
+//这里TextWebsocketFram类型，表示一个文本帧（frame）
+public class GroupChatTextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     private static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        System.out.println("服务器收到消息：" + msg.text());
-        LOGGER.info("-服务器收到消息:{}", msg.text());
-        System.out.println(channelGroup.size());
+        StaticLog.info("-服务器收到消息:{}", msg.text());
         //回复消息
         channelGroup.writeAndFlush(
                 new TextWebSocketFrame(Member.REG_TAB.get(ctx.channel()) +
@@ -35,7 +33,7 @@ public class MyTextWebsocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        String ip = Member.getIP(ctx.channel().remoteAddress().toString());
+        String ip = MyIPUtil.getIP(ctx.channel().remoteAddress().toString());
         try {
             Member.checkIP(ip);
         } catch (Exception e) {
@@ -52,8 +50,7 @@ public class MyTextWebsocketFrameHandler extends SimpleChannelInboundHandler<Tex
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
 
         //asLongText是唯一的id
-        System.out.println("handlerAdded被调用" + ctx.channel().id().asLongText());
-        System.out.println("handlerAdded被调用" + ctx.channel().id().asShortText());
+        StaticLog.debug("handlerAdded被调用.shortChannelId={};longChannelId={}", ctx.channel().id().asShortText(), ctx.channel().id().asLongText());
         channelGroup.add(ctx.channel());
     }
 
@@ -64,14 +61,13 @@ public class MyTextWebsocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("handlerRemoved" + ctx.channel().id().asLongText());
+        StaticLog.debug("handlerRemoved; longChannelId={}", ctx.channel().id().asLongText());
         channelGroup.remove(ctx.channel());
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.out.println("exp发生：" + cause.getMessage());
-        LOGGER.error("catch exp:" + cause.getMessage());
+        StaticLog.error("catch exp:" + cause.getMessage());
         Member.REG_TAB.remove(ctx.channel());
         ctx.close();
     }

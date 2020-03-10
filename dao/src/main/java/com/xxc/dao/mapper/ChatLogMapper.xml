@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxc.dao.mapper.ChatLogMapper">
+  <resultMap id="BaseResultMap" type="com.xxc.dao.model.ChatLog">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <result column="id" jdbcType="INTEGER" property="id" />
+    <result column="uid" jdbcType="VARCHAR" property="uid" />
+    <result column="gid" jdbcType="INTEGER" property="gid" />
+    <result column="ipAddr" jdbcType="VARCHAR" property="ipAddr" />
+    <result column="time" jdbcType="BIGINT" property="time" />
+    <result column="created" jdbcType="TIMESTAMP" property="created" />
+    <result column="message" jdbcType="LONGVARCHAR" property="message" />
+  </resultMap>
+</mapper>

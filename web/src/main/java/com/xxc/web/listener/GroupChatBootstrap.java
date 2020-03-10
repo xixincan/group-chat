@@ -1,13 +1,13 @@
 package com.xxc.web.listener;
 
-import com.xxc.core.GroupChatServer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import cn.hutool.log.StaticLog;
+import com.xxc.web.chatserver.GroupChatServer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author xixincan
@@ -16,8 +16,6 @@ import javax.annotation.Resource;
  */
 @Component
 public class GroupChatBootstrap implements ApplicationListener<ContextRefreshedEvent> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GroupChatBootstrap.class);
 
     @Resource
     private GroupChatServer groupChatServer;
@@ -29,14 +27,14 @@ public class GroupChatBootstrap implements ApplicationListener<ContextRefreshedE
      */
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        LOGGER.info("开始启动群聊服务.....");
+        StaticLog.info("开始启动群聊服务.....");
         //必须使用单独的线程去启动
-        new Thread(() ->{
+        CompletableFuture.runAsync(() -> {
             try {
                 this.groupChatServer.start();
             } catch (InterruptedException e) {
-                LOGGER.error("启动失败", e);
+                StaticLog.error("启动失败", e);
             }
-        }).start();
+        });
     }
 }

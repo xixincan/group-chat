@@ -9,7 +9,7 @@
     var socket;
     //判断当前浏览器是否支持websocket
     if (window.WebSocket) {
-        socket = new WebSocket("ws://127.0.0.1:7000/groupchat");
+        socket = new WebSocket("ws://127.0.0.1:9089/groupchat");
         //相当于channel read0()， ev 收到服务器端回送的消息
         socket.onmessage = function (ev) {
             var rt = document.getElementById("responseText");

@@ -39,7 +39,7 @@
         <!--</plugin>-->
 
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://127.0.0.1:3306/demo_dev"
+                        connectionURL="jdbc:mysql://127.0.0.1:3306/groupchat?nullCatalogMeansCurrent=true"
                         userId="root"
                         password="root123">
         </jdbcConnection>
@@ -55,11 +55,12 @@
                              targetProject="src/main/java"
                              type="XMLMAPPER"/>
 
-        <table tableName="User" domainObjectName="User">
-            <property name="useActualColumnNames" value="true"/>
+        <table tableName="???" domainObjectName="???">
+            <property name="useActualColumnNames"  value="true"/>
+            <!--如果需要分表的，请打开这个注释；生成model后请到分表计算的字段上加自定义注解@MultiTable-->
+<!--            <property name="rootClass" value="com.xxc.dao.base.DynamicTableNameBean"/>-->
             <generatedKey column="id" sqlStatement="Mysql" identity="true"/>
         </table>
-
 
     </context>
 </generatorConfiguration>

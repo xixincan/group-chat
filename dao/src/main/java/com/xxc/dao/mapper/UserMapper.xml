@@ -5,12 +5,19 @@
     <!--
       WARNING - @mbg.generated
     -->
-    <result column="id" jdbcType="INTEGER" property="id" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
-    <result column="age" jdbcType="SMALLINT" property="age" />
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="uid" jdbcType="VARCHAR" property="uid" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
     <result column="password" jdbcType="VARCHAR" property="password" />
-    <result column="updated" jdbcType="BIGINT" property="updated" />
-    <result column="created" jdbcType="BIGINT" property="created" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="avatar" jdbcType="VARCHAR" property="avatar" />
+    <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="mailbox" jdbcType="VARCHAR" property="mailbox" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="level" jdbcType="TINYINT" property="level" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="updated" jdbcType="TIMESTAMP" property="updated" />
+    <result column="created" jdbcType="TIMESTAMP" property="created" />
   </resultMap>
 </mapper>

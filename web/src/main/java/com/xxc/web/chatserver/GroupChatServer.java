@@ -1,6 +1,7 @@
-package com.xxc.core;
+package com.xxc.web.chatserver;
 
-import com.xxc.service.MyTextWebsocketFrameHandler;
+import cn.hutool.log.StaticLog;
+import com.xxc.core.GroupChatTextWebsocketFrameHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,7 +13,10 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  *
@@ -22,6 +26,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class GroupChatServer {
+
+    @Value("${group-chat.bind.port}")
+    private int port;
+
+    @Resource
+    private GroupChatTextWebsocketFrameHandler groupChatTextWebsocketFrameHandler;
 
     public void start() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -50,16 +60,15 @@ public class GroupChatServer {
                             // WebSocketServerProtocolHandler核心功能是将http协议升级为ws协议，保持长连接
                             pipeline.addLast(new WebSocketServerProtocolHandler("/groupchat"));
                             //自定义的处理器
-                            pipeline.addLast(new MyTextWebsocketFrameHandler());
+                            pipeline.addLast(groupChatTextWebsocketFrameHandler);
                         }
                     });
-            System.out.println("netty 服务启动...");
-            ChannelFuture channelFuture = serverBootstrap.bind(7000).sync();
+            ChannelFuture channelFuture = serverBootstrap.bind(this.port).sync();
 
             channelFuture.addListener((ChannelFutureListener) future -> {
-                System.out.println(future.equals(channelFuture));
+//                System.out.println(future.equals(channelFuture));
                 if (future.isSuccess()) {
-                    System.out.println("success");
+                    StaticLog.info("======>>>>>聊天服务已启动<<<<<=======");
                 }
             });
 

@@ -73,6 +73,12 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
 
+        <!--用于停止服务:提供了/shutdown的方式来优雅的停止服务-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-actuator</artifactId>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>

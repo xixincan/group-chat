@@ -1,6 +1,6 @@
 package com.xxc.common.util;
 
-import com.xxc.exp.AccessException;
+import com.xxc.entity.exp.AccessException;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>web</module>
         <module>service</module>
@@ -10,26 +10,39 @@
         <module>entity</module>
     </modules>
     <parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.1.5.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>com.xxc</groupId>
-	<artifactId>parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>root</name>
-	<description>Demo project for Spring Boot</description>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.5.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.xxc</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>root</name>
+    <description>Demo project for Spring Boot</description>
 
-	<properties>
+    <properties>
         <!-- The main class to start by executing java -jar -->
-        <start-class>com.xxc.Application</start-class>
-		<java.version>1.8</java.version>
-	</properties>
-	<dependencies>
+        <!--<start-class>com.xxc.Application</start-class>-->
+        <my_version>1.0.0-SNAPSHOT</my_version>
+        <java.version>1.8</java.version>
+        <!--netty5版本官方已经废弃，官方继续维护4版本-->
+        <netty.version>4.1.42.Final</netty.version>
+        <swagger2.version>2.7.0</swagger2.version>
+        <mybatis.version>2.0.1</mybatis.version>
+        <tk.mybatis.version>1.1.7</tk.mybatis.version>
+        <tk.mapper.version>4.0.2</tk.mapper.version>
+        <pageHelper.version>1.2.3</pageHelper.version>
+        <hutool.version>4.0.5</hutool.version>
+        <dubbo.version>2.7.4.1</dubbo.version>
+        <zk.version>3.4.9</zk.version>
+        <cuartor.version>4.2.0</cuartor.version>
+    </properties>
 
-	</dependencies>
+    <dependencies>
+
+    </dependencies>
 
     <!--多环境 Maven profile整合Spring profile-->
     <profiles>
@@ -56,15 +69,15 @@
         </profile>
     </profiles>
 
-	<build>
-		<plugins>
+    <build>
+        <plugins>
             <!-- 使用1.8编译 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
@@ -82,7 +95,7 @@
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
+        </plugins>
         <resources>
             <resource>
                 <!-- 编译发布时连同非java文件一同发布 -->
@@ -96,6 +109,6 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-	</build>
+    </build>
 
 </project>

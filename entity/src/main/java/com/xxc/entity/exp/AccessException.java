@@ -1,4 +1,4 @@
-package com.xxc.exp;
+package com.xxc.entity.exp;
 
 /**
  * @author xixincan

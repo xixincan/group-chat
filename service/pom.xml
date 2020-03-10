@@ -5,17 +5,17 @@
     <parent>
         <artifactId>parent</artifactId>
         <groupId>com.xxc</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <version>${my_version}</version>
     <artifactId>service</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.xxc</groupId>
             <artifactId>dao</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${my_version}</version>
         </dependency>
     </dependencies>
 

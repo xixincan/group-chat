@@ -75,7 +75,7 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
                             this.response(response, "请求过于频繁！");
                             return false;
                         }
-                        if (!this.RATE_LIMITER.tryAcquire()) {
+                        if (!RATE_LIMITER.tryAcquire()) {
                             String msg = "服务器繁忙，请稍后再试!";
                             StaticLog.warn(msg);
                             this.response(response, msg);
@@ -86,7 +86,7 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
                 }
             }
         }
-        StaticLog.info("com.xxc.web.interceptor.AccessLimitInterceptor.preHandle executed...");
+//        StaticLog.info("com.xxc.web.interceptor.AccessLimitInterceptor.preHandle executed...{}", request.getRequestURL());
         return true;
     }
 
@@ -124,6 +124,6 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
      */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        StaticLog.info("^^^^^&&&&{}", "------- AccessLimitInterceptor - afterCompletion --------");
+//        StaticLog.info("^^^^^&&&&{}", "------- AccessLimitInterceptor - afterCompletion --------");
     }
 }

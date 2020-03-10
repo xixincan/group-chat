@@ -26,9 +26,6 @@ logging:
 spring:
   application:
     name: group-chat
-  mvc:
-    favicon:
-      enabled: false
   aop:
     proxy-target-class: true
   datasource:

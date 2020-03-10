@@ -66,7 +66,6 @@ public class GroupChatServer {
             ChannelFuture channelFuture = serverBootstrap.bind(this.port).sync();
 
             channelFuture.addListener((ChannelFutureListener) future -> {
-//                System.out.println(future.equals(channelFuture));
                 if (future.isSuccess()) {
                     StaticLog.info("======>>>>>聊天服务已启动<<<<<=======");
                 }

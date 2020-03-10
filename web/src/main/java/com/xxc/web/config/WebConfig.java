@@ -1,13 +1,14 @@
 package com.xxc.web.config;
 
 import com.xxc.web.interceptor.AccessLimitInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.xxc.web.interceptor.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.MappedInterceptor;
+
+import javax.annotation.Resource;
 
 /**
  * 默认首页
@@ -19,13 +20,11 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Autowired
+    @Resource
     private AccessLimitInterceptor accessLimitInterceptor;
 
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("forward:index.html");
-    }
+    @Resource
+    private LoginInterceptor loginInterceptor;
 
     /**
      * Add Spring MVC lifecycle interceptors for pre- and post-processing of
@@ -44,5 +43,6 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(this.accessLimitInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(this.loginInterceptor).addPathPatterns("/**");
     }
 }

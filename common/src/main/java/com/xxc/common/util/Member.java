@@ -28,11 +28,6 @@ public class Member {
        WHITE_MAP.put("localhost", "xixincan");
     }
 
-    public static String getIP(String remoteAddr) {
-        StaticLog.info(remoteAddr);
-        return remoteAddr.substring(1, remoteAddr.indexOf(":"));
-    }
-
     public static void checkIP(String ipAddr) {
         if (!WHITE_MAP.keySet().contains(ipAddr)) {
             StaticLog.error("不在IP白名单内，拒绝访问{}", ipAddr);

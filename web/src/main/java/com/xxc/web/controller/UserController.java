@@ -1,11 +1,10 @@
 package com.xxc.web.controller;
 
-import com.xxc.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
+import com.xxc.service.IUserService;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * @Author: xixincan
@@ -16,21 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("user")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    @Resource
+    private IUserService userService;
 
-    @RequestMapping("get")
-    public Object get(String name) {
-        if (StringUtils.isEmpty(name)) {
-            return this.userService.getAll();
-        }
-        return this.userService.get(name);
-    }
-
-    @RequestMapping("page")
-    public Object page(@RequestParam(required = false, defaultValue = "1") Integer page,
-                       @RequestParam(required = false, defaultValue = "3") Integer size) {
-        return this.userService.page(page, size);
-    }
 
 }

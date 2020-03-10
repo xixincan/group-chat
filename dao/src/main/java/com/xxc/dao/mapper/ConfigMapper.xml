@@ -5,9 +5,18 @@
     <!--
       WARNING - @mbg.generated
     -->
-    <result column="id" jdbcType="INTEGER" property="id" />
-    <result column="key" jdbcType="VARCHAR" property="key" />
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="keyword" jdbcType="VARCHAR" property="keyword" />
     <result column="value" jdbcType="VARCHAR" property="value" />
     <result column="remark" jdbcType="VARCHAR" property="remark" />
   </resultMap>
+
+  <update id="updateBatch" parameterType="com.xxc.dao.model.Config">
+    <foreach collection="configList" index="index" item="item" open="" separator=";" close="" >
+      update config
+      set value=#{item.value},remark=#{item.remark}
+      where keyword=#{item.keyword}
+    </foreach>
+  </update>
+
 </mapper>

@@ -5,12 +5,13 @@ import javax.persistence.*;
 
 @Table(name = "config")
 public class Config implements Serializable {
+    @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "key")
-    private String key;
+    @Column(name = "keyword")
+    private String keyword;
 
     @Column(name = "value")
     private String value;
@@ -35,17 +36,17 @@ public class Config implements Serializable {
     }
 
     /**
-     * @return key
+     * @return keyword
      */
-    public String getKey() {
-        return key;
+    public String getKeyword() {
+        return keyword;
     }
 
     /**
-     * @param key
+     * @param keyword
      */
-    public void setKey(String key) {
-        this.key = key;
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
     }
 
     /**

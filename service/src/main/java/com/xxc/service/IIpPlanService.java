@@ -19,4 +19,5 @@ public interface IIpPlanService {
 
     boolean isBlack(String ipAddr);
 
+    boolean checkIpAddr(String ipAddr);
 }

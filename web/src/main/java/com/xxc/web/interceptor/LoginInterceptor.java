@@ -1,11 +1,7 @@
 package com.xxc.web.interceptor;
 
-import cn.hutool.log.StaticLog;
-import com.xxc.common.consts.ConfigKey;
-import com.xxc.common.enums.IpPlanEnum;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.annotation.SkipLoginCheck;
-import com.xxc.service.IConfigService;
 import com.xxc.service.IIpPlanService;
 import com.xxc.service.ILoginService;
 import org.springframework.stereotype.Component;
@@ -25,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginInterceptor implements HandlerInterceptor {
 
     @Resource
-    private IConfigService configService;
-    @Resource
     private IIpPlanService ipPlanService;
     @Resource
     private ILoginService loginService;
@@ -43,23 +37,8 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
         //获取访问的真实ip
         String ipAddr = MyIPUtil.getRemoteIpAddr(request);
-        Integer ip_plan = this.configService.getIntegerValue(ConfigKey.IP_PLAN);
-        IpPlanEnum planEnum = IpPlanEnum.find(ip_plan);
-        switch (planEnum) {
-            case WHITE_ACCESS:
-                if (this.ipPlanService.isWhite(ipAddr)) {
-                    break;
-                }
-                StaticLog.warn("非白名单IP访问阻止:IP={}", ipAddr);
-                return false;
-            case BLACK_DENIED:
-                if (this.ipPlanService.isBlack(ipAddr)) {
-                    StaticLog.warn("黑名单IP访问阻止:IP={}", ipAddr);
-                    return false;
-                }
-                break;
-            default:
-                break;
+        if (!this.ipPlanService.checkIpAddr(ipAddr)) {
+            return false;
         }
 
         // 如果请求登录页

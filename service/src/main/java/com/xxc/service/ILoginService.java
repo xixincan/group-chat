@@ -3,6 +3,7 @@ package com.xxc.service;
 import com.xxc.entity.request.UserLoginForm;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author xixincan
@@ -25,12 +26,12 @@ public interface ILoginService {
      * @param request request
      * @param userLoginForm form
      */
-    void doLogin(HttpServletRequest request, UserLoginForm userLoginForm);
+    void doLogin(HttpServletRequest request, HttpServletResponse response, UserLoginForm userLoginForm);
 
     /**
      * 登出
      *
      * @param request request
      */
-    void logout(HttpServletRequest request);
+    void logout(HttpServletRequest request, HttpServletResponse response);
 }

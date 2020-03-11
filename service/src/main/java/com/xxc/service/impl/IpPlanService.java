@@ -2,10 +2,13 @@ package com.xxc.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.log.StaticLog;
+import com.xxc.common.consts.ConfigKey;
+import com.xxc.entity.enums.IpPlanEnum;
 import com.xxc.dao.mapper.IpBlackListMapper;
 import com.xxc.dao.mapper.IpWhiteListMapper;
 import com.xxc.dao.model.IpBlackList;
 import com.xxc.dao.model.IpWhiteList;
+import com.xxc.service.IConfigService;
 import com.xxc.service.IIpPlanService;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -27,13 +30,15 @@ public class IpPlanService implements IIpPlanService {
     private static List<String> blackLists = null;
 
     @Resource
+    private IConfigService configService;
+    @Resource
     private IpWhiteListMapper whiteListMapper;
-
     @Resource
     private IpBlackListMapper blackListMapper;
 
     @Override
     public void reload() {
+        //todo 修改为Redis缓存
         Example example = new Example(IpBlackList.class);
         example.createCriteria().andEqualTo("valid", Boolean.TRUE);
         List<IpBlackList> ipBlackLists = this.blackListMapper.selectByExample(example);
@@ -72,5 +77,28 @@ public class IpPlanService implements IIpPlanService {
     @Override
     public boolean isBlack(String ipAddr) {
         return this.getBlackList().contains(ipAddr);
+    }
+
+    @Override
+    public boolean checkIpAddr(String ipAddr) {
+        Integer ip_plan = this.configService.getIntegerValue(ConfigKey.IP_PLAN);
+        IpPlanEnum planEnum = IpPlanEnum.find(ip_plan);
+        switch (planEnum) {
+            case WHITE_ACCESS:
+                if (this.isWhite(ipAddr)) {
+                    break;
+                }
+                StaticLog.warn("非白名单IP访问阻止:IP={}", ipAddr);
+                return false;
+            case BLACK_DENIED:
+                if (this.isBlack(ipAddr)) {
+                    StaticLog.warn("黑名单IP访问阻止:IP={}", ipAddr);
+                    return false;
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 }

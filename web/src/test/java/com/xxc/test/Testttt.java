@@ -1,6 +1,10 @@
 package com.xxc.test;
 
+import cn.hutool.json.JSONUtil;
 import com.xxc.common.cache.RedisService;
+import com.xxc.entity.response.UserInfo;
+import com.xxc.service.impl.UserService;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,12 +17,15 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class Test {
+public class Testttt {
 
     @Autowired
     private RedisService redisService;
 
-    @org.junit.Test
+    @Autowired
+    UserService userService;
+
+    @Test
     public void testRedis() {
         System.out.println(this.redisService.getString("test"));
         System.out.println(this.redisService.getString("test1"));
@@ -28,6 +35,12 @@ public class Test {
         System.out.println(this.redisService.getString("ok1"));
         System.out.println(this.redisService.getString("ok2"));
         System.out.println(this.redisService.getString("ok3"));
+    }
+
+    @Test
+    public void testUserInfo() {
+//        UserInfo xixincan = this.userService.getUserInfo("xixincan");
+//        System.out.println(JSONUtil.toJsonStr(xixincan));
     }
 
 }

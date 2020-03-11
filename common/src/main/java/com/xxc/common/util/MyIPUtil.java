@@ -50,7 +50,7 @@ public class MyIPUtil {
         return (!StringUtils.isEmpty(ipAddr)) && (ipAddr.contains("127.0.0.1") || ipAddr.contains("localhost"));
     }
 
-    public static String getIP(String remoteAddr) {
+    public static String getChannelRemoteIP(String remoteAddr) {
         StaticLog.info(remoteAddr);
         return remoteAddr.substring(1, remoteAddr.indexOf(":"));
     }

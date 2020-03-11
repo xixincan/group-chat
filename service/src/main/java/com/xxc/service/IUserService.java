@@ -1,9 +1,13 @@
 package com.xxc.service;
 
-import com.xxc.common.enums.UserEventEnum;
+import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.dao.model.User;
+import com.xxc.entity.response.GroupInfo;
+import com.xxc.entity.response.UserInfo;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @Author: xixincan
@@ -13,19 +17,37 @@ import javax.servlet.http.HttpServletRequest;
 public interface IUserService {
 
     /**
-     * user
-     *
-     * @param username username
-     * @return user
+     * 获取用户对象
      */
     User getUser(String username);
 
     /**
-     * 记录
-     *
-     * @param uid     uid
-     * @param request req
-     * @param event   ev
+     * 获取用户信息（获取用户自身的）
      */
-    void userLog(String uid, HttpServletRequest request, UserEventEnum event);
+    UserInfo getUserInfo(HttpServletRequest request);
+
+    /**
+     * 获取用户好友
+     */
+    List<UserInfo> findFriends(String uid);
+
+    /**
+     * 获取用户群组
+     */
+    List<GroupInfo> findGroups(String uid);
+
+    /**
+     * 获取群成员
+     */
+    List<UserInfo> findMembers(Integer gid);
+
+    /**
+     * 获取用户简要信息（获取其他用户的）
+     */
+    List<UserInfo> getUserSimpleInfoList(Collection<String> uidList);
+
+    /**
+     * 记录
+     */
+    void recordUserLog(String uid, HttpServletRequest request, UserEventEnum event);
 }

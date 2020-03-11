@@ -33,6 +33,7 @@ public class ConfigService implements IConfigService {
 
     @Override
     public void reload() {
+        //todo 修改为Redis缓存
         List<Config> configs = this.configMapper.selectAll();
         Map<String, Config> temp = Maps.newHashMap();
         if (CollectionUtil.isNotEmpty(configs)) {

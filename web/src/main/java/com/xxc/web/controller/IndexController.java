@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -34,18 +35,18 @@ public class IndexController {
     @PostMapping("login")
     public MyResult<String> login(@Valid UserLoginForm userLoginForm,
                                   BindingResult result,
-                                  HttpServletRequest request) {
+                                  HttpServletRequest request, HttpServletResponse response) {
         if (result.hasErrors()) {
             return new MyResult<>(500, result.getAllErrors().get(0).getDefaultMessage());
         }
-        this.loginService.doLogin(request, userLoginForm);
+        this.loginService.doLogin(request, response, userLoginForm);
         return new MyResult<>("/");
     }
 
     @ResponseBody
     @PostMapping("logout")
-    public String logout(HttpServletRequest request) {
-        this.loginService.logout(request);
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        this.loginService.logout(request, response);
         return "/login.html";
     }
 

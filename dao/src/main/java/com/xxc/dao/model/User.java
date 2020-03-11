@@ -48,6 +48,12 @@ public class User implements Serializable {
     private Integer age;
 
     /**
+     * 0:F 1:M
+     */
+    @Column(name = "sex")
+    private Boolean sex;
+
+    /**
      * 手机
      */
     @Column(name = "mobile")
@@ -205,6 +211,14 @@ public class User implements Serializable {
      */
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public Boolean getSex() {
+        return sex;
+    }
+
+    public void setSex(Boolean sex) {
+        this.sex = sex;
     }
 
     /**

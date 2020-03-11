@@ -12,6 +12,7 @@
     <result column="nickname" jdbcType="VARCHAR" property="nickname" />
     <result column="avatar" jdbcType="VARCHAR" property="avatar" />
     <result column="age" jdbcType="INTEGER" property="age" />
+    <result column="sex" jdbcType="BIT" property="sex" />
     <result column="mobile" jdbcType="VARCHAR" property="mobile" />
     <result column="mailbox" jdbcType="VARCHAR" property="mailbox" />
     <result column="address" jdbcType="VARCHAR" property="address" />

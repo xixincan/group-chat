@@ -1,4 +1,4 @@
-package com.xxc.common.enums;
+package com.xxc.entity.enums;
 
 /**
  * @author xixincan

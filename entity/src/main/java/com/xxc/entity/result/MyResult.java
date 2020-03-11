@@ -24,12 +24,21 @@ public class MyResult<T> implements Serializable {
     public MyResult() {
     }
 
+    public static <T> MyResult<T> success(T data) {
+        return new MyResult<>(data);
+    }
+
+    public static <T> MyResult<T> error(Integer code, String message, Throwable... exp) {
+        return new MyResult<>(code, message, exp);
+    }
+
     public MyResult(T data) {
         this.data = data;
     }
 
     public MyResult(Integer code, String message, Throwable... exp) {
         this.code = code;
+        this.success = false;
         this.message = message;
         if (null != exp && exp.length > 0) {
             this.exp = exp[0];

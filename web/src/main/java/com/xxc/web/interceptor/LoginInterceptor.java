@@ -7,6 +7,7 @@ import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.annotation.SkipLoginCheck;
 import com.xxc.service.IConfigService;
 import com.xxc.service.IIpPlanService;
+import com.xxc.service.ILoginService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,9 +26,10 @@ public class LoginInterceptor implements HandlerInterceptor {
 
     @Resource
     private IConfigService configService;
-
     @Resource
     private IIpPlanService ipPlanService;
+    @Resource
+    private ILoginService loginService;
 
     /**
      * 登录校验，没有通过的直接跳转至登录页面
@@ -65,18 +67,18 @@ public class LoginInterceptor implements HandlerInterceptor {
         SkipLoginCheck skipLoginCheck = handlerMethod.getMethodAnnotation(SkipLoginCheck.class);
         if (null != skipLoginCheck) {
             //免登录权限
-            System.out.println(1111111);
             return true;
         }
 
-        //todo 登录校验
-
+        //登录校验
+        if (this.loginService.checkLogin(request)) {
+            return true;
+        }
 
         StringBuffer requestURL = request.getRequestURL();
-        String requestURI = request.getRequestURI();
         StringBuffer loginURI = requestURL
-                .delete(requestURL.length() - requestURI.length(), requestURL.length())
-                .append("/login");
+                .delete(requestURL.length() - request.getRequestURI().length(), requestURL.length())
+                .append("/login.html");
         response.sendRedirect(loginURI.toString());
         return false;
     }

@@ -1,9 +1,16 @@
 package com.xxc.web.controller;
 
 import com.xxc.entity.annotation.SkipLoginCheck;
+import com.xxc.entity.request.UserLoginForm;
+import com.xxc.entity.result.MyResult;
+import com.xxc.service.ILoginService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 /**
  * @author xixincan
@@ -13,16 +20,33 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("")
 public class IndexController {
-    @SkipLoginCheck
-    @RequestMapping(value = {"/", "/index"}, method = RequestMethod.GET)
+
+    @Resource
+    private ILoginService loginService;
+
+    @RequestMapping(value = {"/"}, method = RequestMethod.GET)
     public String index() {
-        return "/view/index.html";
+        return "/index.html";
     }
 
     @SkipLoginCheck
-    @RequestMapping(value = "login", method = RequestMethod.GET)
-    public String login() {
-        return "/view/login.html";
+    @ResponseBody
+    @PostMapping("login")
+    public MyResult<String> login(@Valid UserLoginForm userLoginForm,
+                                  BindingResult result,
+                                  HttpServletRequest request) {
+        if (result.hasErrors()) {
+            return new MyResult<>(500, result.getAllErrors().get(0).getDefaultMessage());
+        }
+        this.loginService.doLogin(request, userLoginForm);
+        return new MyResult<>("/");
+    }
+
+    @ResponseBody
+    @PostMapping("logout")
+    public String logout(HttpServletRequest request) {
+        this.loginService.logout(request);
+        return "/login.html";
     }
 
 }

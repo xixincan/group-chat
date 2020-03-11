@@ -3,12 +3,15 @@ package com.xxc.web.config;
 import com.xxc.web.interceptor.AccessLimitInterceptor;
 import com.xxc.web.interceptor.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.handler.MappedInterceptor;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 默认首页
@@ -42,7 +45,12 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(this.accessLimitInterceptor).addPathPatterns("/**");
-        registry.addInterceptor(this.loginInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(this.accessLimitInterceptor)
+                .excludePathPatterns("/error")
+                .excludePathPatterns("/static/**")
+                .addPathPatterns("/**");
+        registry.addInterceptor(this.loginInterceptor)
+                .excludePathPatterns("/error", "/static/**", "/login")
+                .addPathPatterns("/**");
     }
 }

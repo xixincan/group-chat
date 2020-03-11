@@ -21,11 +21,6 @@ public enum IpPlanEnum {
         return strategy;
     }
 
-    public IpPlanEnum setStrategy(int strategy) {
-        this.strategy = strategy;
-        return this;
-    }
-
     public static IpPlanEnum find(Integer strategy) {
         if (null != strategy) {
             IpPlanEnum[] values = IpPlanEnum.values();

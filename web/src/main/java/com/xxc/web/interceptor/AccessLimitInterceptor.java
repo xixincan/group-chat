@@ -7,12 +7,12 @@ import com.xxc.entity.annotation.AccessLimit;
 import com.xxc.common.cache.RedisService;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.result.MyResult;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +31,7 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
 
     private static final RateLimiter RATE_LIMITER = RateLimiter.create(10d);
 
-    @Autowired
+    @Resource
     private RedisService redisService;
 
     /**
@@ -86,7 +86,7 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
                 }
             }
         }
-//        StaticLog.info("com.xxc.web.interceptor.AccessLimitInterceptor.preHandle executed...{}", request.getRequestURL());
+        StaticLog.info("com.xxc.web.interceptor.AccessLimitInterceptor.preHandle executed...{}", request.getRequestURL());
         return true;
     }
 

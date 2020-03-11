@@ -32,6 +32,10 @@ public class RedisService {
         this.stringRedisTemplate.opsForValue().set(key, value);
     }
 
+    public void setString(String key, String value, long timeout) {
+        this.stringRedisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+    }
+
     public Integer getInteger(String key) {
         return this.redisTemplate.opsForValue().get(key);
     }

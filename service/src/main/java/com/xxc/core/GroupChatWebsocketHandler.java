@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Service
 @ChannelHandler.Sharable
 //这里TextWebsocketFram类型，表示一个文本帧（frame）
-public class GroupChatTextWebsocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
+public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     private static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 

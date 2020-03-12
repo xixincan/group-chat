@@ -112,14 +112,15 @@ public class LoginService implements ILoginService {
                 if (StrUtil.isEmpty(uid)) {
                     return;
                 }
-                CompletableFuture.runAsync(() -> {
-                    this.redisService.remove(this.getKey(uid));
-                    this.userService.recordUserLog(uid, request, UserEventEnum.LOGOUT);
-                }).thenRunAsync(() -> {
-                    StaticLog.info("用户成功登出:{}", uid);
-                });
+                CompletableFuture
+                        .runAsync(() -> {
+                            this.redisService.remove(this.getKey(uid));
+                            this.userService.recordUserLog(uid, request, UserEventEnum.LOGOUT);
+                        })
+                        .thenRunAsync(() -> StaticLog.info("用户成功登出:{}", uid));
                 cookie.setPath("/");
                 cookie.setMaxAge(0);
+                cookie.setValue("");
                 response.addCookie(cookie);
             }
         }

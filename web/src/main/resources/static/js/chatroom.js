@@ -394,7 +394,7 @@ function logout() {
         success: function (data) {
             // 3. 注销成功，进行页面跳转
             console.log("登出成功！");
-            window.location.href = "/";
+            window.location.href = data;
         }
     });
 }

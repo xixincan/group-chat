@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.exp.AccessException;
+import com.xxc.entity.result.MyResult;
 import com.xxc.service.IConfigService;
 import com.xxc.service.IIpPlanService;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,11 @@ public class CacheController {
             return "SUCCESSFUL";
         }
         throw new AccessException("Access Denied.");
+    }
+
+    @RequestMapping(value = "get", method = {RequestMethod.GET, RequestMethod.POST})
+    public MyResult<String> get(String key) {
+        return MyResult.success(this.configService.getValue(key));
     }
 
 }

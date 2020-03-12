@@ -7,11 +7,31 @@ package com.xxc.entity.enums;
  */
 public enum ChatTypeEnum {
 
-    REGISTER,
-    SINGLE_SENDING,
-    GROUP_SENDING,
-    FILE_MSG_SINGLE_SENDING,
-    FILE_MSG_GROUP_SENDING,
+    ERROR(-1),
+    REGISTER(0),
+    SINGLE_SENDING(1),
+    GROUP_SENDING(2),
+    FILE_MSG_SINGLE_SENDING(3),
+    FILE_MSG_GROUP_SENDING(4),
     ;
 
+    private int type;
+
+    ChatTypeEnum(int type) {
+        this.type = type;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public static ChatTypeEnum find(int type) {
+        ChatTypeEnum[] values = ChatTypeEnum.values();
+        for (ChatTypeEnum item : values) {
+            if (item.getType() == type) {
+                return item;
+            }
+        }
+        return ERROR;
+    }
 }

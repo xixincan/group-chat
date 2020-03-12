@@ -58,6 +58,21 @@ public class LoginService implements ILoginService {
      */
     @Override
     public void doLogin(HttpServletRequest request, HttpServletResponse response, UserLoginForm userLoginForm) {
+        //重复登录的校验
+        String ticket = TicketUtil.getTicket(request);
+        if (StrUtil.isNotEmpty(ticket)) {
+            //请求携带了ticket，查看是否已经登录过了
+            String uid = TicketUtil.getUid(ticket);
+            User user = this.redisService.serializeGet(this.getKey(uid), User.class);
+            if (null != user) {
+                if (!StrUtil.equals(userLoginForm.getPassword(), user.getPassword())) {
+                    throw new ValidException("用户名或密码错误");
+                } else {
+                    return;
+                }
+            }
+        }
+
         User user = this.userService.getUser(userLoginForm.getUsername());
         if (null == user || !StrUtil.equals(userLoginForm.getPassword(), user.getPassword())) {
             throw new ValidException("用户名或密码错误");
@@ -66,14 +81,16 @@ public class LoginService implements ILoginService {
             throw new ValidException("用户状态不合法");
         }
         //添加redis缓存登录信息
-        String userJson = JSONUtil.toJsonStr(user);
-        this.redisService.setString(this.getKey(user.getUid()), userJson, 24 * 60 * 60);
-        this.userService.recordUserLog(user.getUid(), request, UserEventEnum.LOGIN);
+        CompletableFuture.runAsync(() -> {
+            this.redisService.serializeSave(this.getKey(user.getUid()), user, 24 * 60 * 60);
+            this.userService.recordUserLog(user.getUid(), request, UserEventEnum.LOGIN);
+        });
         //设置cookie
         Cookie cookie = new Cookie(ConfigKey.TICKET, TicketUtil.genTicket(user.getUid()));
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
+        StaticLog.info("用户登录成功:UID={}", user.getUid());
     }
 
     private String getKey(String uid) {

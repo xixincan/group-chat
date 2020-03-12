@@ -15,6 +15,9 @@ public class TicketUtil {
 
     public static String getTicket(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
+        if (null == cookies) {
+            return null;
+        }
         for (Cookie cookie : cookies) {
             if (ConfigKey.TICKET.equals(cookie.getName())) {
                 return cookie.getValue();
@@ -24,6 +27,9 @@ public class TicketUtil {
     }
 
     public static String genTicket(String uid) {
+        if (null != uid) {
+            return EncryptUtil.encodeBase64(uid);
+        }
         return null;
     }
 

@@ -7,6 +7,8 @@ package com.xxc.common.consts;
  */
 public interface ConfigKey {
 
+    String CHAT_WS_PATH = "chat_ws_path";
+
     String IP_PLAN = "ip_plan";
 
     String TICKET = "ticket";

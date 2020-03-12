@@ -1,8 +1,8 @@
 package com.xxc.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisService;
 import com.xxc.common.consts.ConfigKey;
@@ -69,8 +69,8 @@ public class UserService implements IUserService {
         }
         String uid = TicketUtil.getUid(ticket);
         String userKey = ConfigKey.USER_KEY + uid;
-        String userJson = this.redisService.getString(userKey);
-        if (StrUtil.isEmpty(userJson)) {
+        User cacheUser = this.redisService.serializeGet(userKey, User.class);
+        if (null == cacheUser) {
             throw new AccessException("请重新登录");
         }
 
@@ -79,10 +79,12 @@ public class UserService implements IUserService {
 
         if (null == cacheInfo) {
             StaticLog.info("用户详情缓存未命中:{}", userInfoKey);
-            final UserInfo userInfo = JSONUtil.toBean(userJson, UserInfo.class);
+            final UserInfo userInfo = new UserInfo();
+            BeanUtil.copyProperties(cacheUser, userInfo);
             userInfo.setGroupList(this.findGroups(userInfo.getUid()));
             userInfo.setFriendList(this.findFriends(userInfo.getUid()));
-            CompletableFuture.runAsync(() -> this.redisService.serializeSave(userInfoKey, userInfo, 2 * 24 * 60 * 60))
+            CompletableFuture
+                    .runAsync(() -> this.redisService.serializeSave(userInfoKey, userInfo, 7 * 24 * 60 * 60))
                     .thenRunAsync(() -> StaticLog.info("用户详情已经写入缓存:{}", userInfoKey));
 
             return userInfo;
@@ -146,13 +148,15 @@ public class UserService implements IUserService {
 
     @Override
     public List<UserInfo> getUserSimpleInfoList(Collection<String> uidList) {
+        //todo 优化-> 先从缓存中取user转换成UserInfo
         Example example = new Example(User.class);
-        example.selectProperties("nickname", "avatar", "age", "sex");
+        example.selectProperties("uid", "nickname", "avatar", "age", "sex");
         example.createCriteria().andIn("uid", uidList).andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
         List<User> userList = this.userMapper.selectByExample(example);
         List<UserInfo> userSimpleInfoList = new ArrayList<>();
         userList.forEach(item ->
                 userSimpleInfoList.add(new UserInfo()
+                        .setUid(item.getUid())
                         .setNickname(item.getNickname())
                         .setAvatar(item.getAvatar())
                         .setAge(item.getAge())

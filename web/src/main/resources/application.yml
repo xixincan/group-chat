@@ -12,10 +12,6 @@ server:
     session:
       timeout: 3600s
 
-group-chat:
-  bind:
-    port: 9089
-
 #logback 配置
 logging:
   file: logs/service.log

@@ -1,5 +1,7 @@
 package com.xxc.core;
 
+import com.xxc.common.consts.ConfigKey;
+import com.xxc.service.IConfigService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -8,9 +10,11 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author xixincan
@@ -20,6 +24,8 @@ import javax.annotation.Resource;
 @Service
 public class GroupChatClientInitHandler extends ChannelInitializer<SocketChannel> {
 
+    @Resource
+    private IConfigService configService;
     @Resource
     private GroupChatWebsocketHandler groupChatWebsocketHandler;
 
@@ -44,7 +50,15 @@ public class GroupChatClientInitHandler extends ChannelInitializer<SocketChannel
         // 可以看到WebsocketFrame下面有6个子类
         // 浏览器请求时：ws://localhost:7000/hello 表示请求的uri
         // WebSocketServerProtocolHandler核心功能是将http协议升级为ws协议，保持长连接
-        pipeline.addLast(new WebSocketServerProtocolHandler("/groupchat"));
+        pipeline.addLast(new WebSocketServerProtocolHandler(this.configService.getValue(ConfigKey.CHAT_WS_URI)));
+        //Netty提供的处理空闲状态的处理器，1没读2没写3没有读写 就会发送一个心跳检测包金策是否连接
+        //当idleStateEvent触发后，就会传递给管道的下一个handler去处理；通过调用下一个handler的userEventTriggered
+        //有可能： 读空闲、写空闲、读写空闲
+        pipeline.addLast(new IdleStateHandler(
+                this.configService.getIntegerValue(ConfigKey.READ_IDLE),
+                this.configService.getIntegerValue(ConfigKey.WRITE_IDLE),
+                this.configService.getIntegerValue(ConfigKey.ALL_IDLE)
+        ));
         //自定义的处理器
         pipeline.addLast(this.groupChatWebsocketHandler);
     }

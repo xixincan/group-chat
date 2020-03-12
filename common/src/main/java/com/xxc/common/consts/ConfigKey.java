@@ -7,7 +7,11 @@ package com.xxc.common.consts;
  */
 public interface ConfigKey {
 
-    String CHAT_WS_PATH = "chat_ws_path";
+    String CHAT_WS_HOST = "chat_ws_host";
+
+    String CHAT_WS_PORT = "chat_ws_port";
+
+    String CHAT_WS_URI = "chat_ws_uri";
 
     String IP_PLAN = "ip_plan";
 
@@ -16,5 +20,11 @@ public interface ConfigKey {
     String USER_KEY = "user:";
 
     String USER_INFO_KEY = "user_info:";
+
+    String READ_IDLE = "read_idle";
+
+    String WRITE_IDLE = "write_idle";
+
+    String ALL_IDLE = "all_idle";
 
 }

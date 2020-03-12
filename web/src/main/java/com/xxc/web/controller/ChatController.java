@@ -23,7 +23,11 @@ public class ChatController {
 
     @PostMapping("groupchat/path")
     public MyResult<String> getWebSocketURI() {
-        return MyResult.success(this.configService.getValue(ConfigKey.CHAT_WS_PATH));
+        return MyResult.success(
+                this.configService.getValue(ConfigKey.CHAT_WS_HOST) + ":" +
+                        this.configService.getValue(ConfigKey.CHAT_WS_PORT) +
+                        this.configService.getValue(ConfigKey.CHAT_WS_URI)
+        );
     }
 
 }

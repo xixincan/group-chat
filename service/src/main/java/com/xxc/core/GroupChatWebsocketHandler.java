@@ -15,6 +15,7 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,6 @@ import java.time.LocalDateTime;
 
 @Service
 @ChannelHandler.Sharable
-//这里TextWebsocketFrame类型，表示一个文本帧（frame）
 public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
     private static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
@@ -58,12 +58,38 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<WebSo
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, WebSocketFrame msg) throws Exception {
+        //这里TextWebsocketFrame类型，表示一个文本帧（frame）
+
 //        StaticLog.info("-服务器收到消息:{}", msg.text());
         //回复消息
         channelGroup.writeAndFlush(
                 new TextWebSocketFrame(Member.REG_TAB.get(ctx.channel()) +
                         " " + LocalDateTime.now() + "\n" + msg)
         );
+    }
+
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof IdleStateEvent) {
+            //将event向下转型
+            IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
+            String eventType;
+            switch (idleStateEvent.state()) {
+                case READER_IDLE:
+                    eventType = "读空闲";
+                    break;
+                case WRITER_IDLE:
+                    eventType = "写空闲";
+                    break;
+                case ALL_IDLE:
+                    eventType = "读写空闲";
+                    break;
+                default:
+                    eventType = "未知空闲";
+                    break;
+            }
+            StaticLog.info("{}-超时事件--{}", ctx.channel().remoteAddress(), eventType);
+        }
     }
 
     @Override

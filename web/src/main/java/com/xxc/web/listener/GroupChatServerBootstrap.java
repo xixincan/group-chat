@@ -1,7 +1,9 @@
 package com.xxc.web.listener;
 
 import cn.hutool.log.StaticLog;
+import com.xxc.common.consts.ConfigKey;
 import com.xxc.core.GroupChatClientInitHandler;
+import com.xxc.service.IConfigService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -27,12 +29,12 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class GroupChatServerBootstrap {
 
-    @Value("${group-chat.bind.port}")
-    private int port;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     private ChannelFuture serverChannelFuture;
 
+    @Resource
+    private IConfigService configService;
     @Resource
     private GroupChatClientInitHandler groupChatClientInitHandler;
 
@@ -70,7 +72,7 @@ public class GroupChatServerBootstrap {
                     //自定义消息处理器
                     .childHandler(this.groupChatClientInitHandler);
 
-            this.serverChannelFuture = serverBootstrap.bind(this.port).sync();
+            this.serverChannelFuture = serverBootstrap.bind(this.configService.getIntegerValue(ConfigKey.CHAT_WS_PORT)).sync();
 
             this.serverChannelFuture.addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
@@ -81,7 +83,7 @@ public class GroupChatServerBootstrap {
             //监听channel关闭
 //            this.serverChannelFuture.channel().closeFuture().sync();
         } catch (Exception exp) {
-            StaticLog.error("聊天服务遇到问题关闭服务:{}", exp.getStackTrace());
+            StaticLog.error("聊天服务遇到问题关闭服务:{}:{}", exp.getStackTrace(), exp);
             this.bossGroup.shutdownGracefully();
             this.workerGroup.shutdownGracefully();
         }
@@ -97,7 +99,7 @@ public class GroupChatServerBootstrap {
             workerGroupFuture.await();
             StaticLog.warn("====>>>>群聊服务关闭<<<<======");
         } catch (InterruptedException ie) {
-            StaticLog.error("群聊服务关闭遇到问题:{}", ie.getStackTrace());
+            StaticLog.error("群聊服务关闭遇到问题:{}:{}", ie.getStackTrace(), ie);
         }
     }
 

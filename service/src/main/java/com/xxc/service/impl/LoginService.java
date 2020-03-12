@@ -2,11 +2,12 @@ package com.xxc.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisService;
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.util.TicketUtil;
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.entity.enums.UserStatusEnum;
-import com.xxc.common.util.ThreadLocalUtil;
 import com.xxc.dao.model.User;
 import com.xxc.entity.exp.ValidException;
 import com.xxc.entity.request.UserLoginForm;
@@ -18,7 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author xixincan
@@ -41,8 +42,12 @@ public class LoginService implements ILoginService {
      */
     @Override
     public boolean checkLogin(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        return null != session.getAttribute(ConfigKey.TICKET);
+        String ticket = TicketUtil.getTicket(request);
+        if (StrUtil.isNotEmpty(ticket)) {
+            String uid = TicketUtil.getUid(ticket);
+            return this.redisService.exist(this.getKey(uid));
+        }
+        return false;
     }
 
     /**
@@ -60,16 +65,19 @@ public class LoginService implements ILoginService {
         if (user.getStatus() != UserStatusEnum.NORMAL.getStatus()) {
             throw new ValidException("用户状态不合法");
         }
-        //添加session
-        String userInfo = JSONUtil.toJsonStr(user);
-        request.getSession().setAttribute(ConfigKey.TICKET, user.getUid());
-        ThreadLocalUtil.bind(user.getUid(), userInfo);
-        this.redisService.setString(user.getUid(), userInfo, 24 * 60 * 60);
+        //添加redis缓存登录信息
+        String userJson = JSONUtil.toJsonStr(user);
+        this.redisService.setString(this.getKey(user.getUid()), userJson, 24 * 60 * 60);
         this.userService.recordUserLog(user.getUid(), request, UserEventEnum.LOGIN);
         //设置cookie
-        Cookie cookie = new Cookie(ConfigKey.TICKET, user.getUid());
+        Cookie cookie = new Cookie(ConfigKey.TICKET, TicketUtil.genTicket(user.getUid()));
         cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
+    }
+
+    private String getKey(String uid) {
+        return ConfigKey.USER_KEY + uid;
     }
 
     /**
@@ -79,20 +87,24 @@ public class LoginService implements ILoginService {
      */
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession();
-        String uid = (String) session.getAttribute(ConfigKey.TICKET);
-        if (null != uid) {
-            // 注销本地session
-            session.removeAttribute(ConfigKey.TICKET);
-            session.invalidate();
-            ThreadLocalUtil.unBind(uid);
-            this.redisService.remove(uid);
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            //删除cookie
+            if (ConfigKey.TICKET.equals(cookie.getName())) {
+                final String uid = TicketUtil.getUid(cookie.getValue());
+                if (StrUtil.isEmpty(uid)) {
+                    return;
+                }
+                CompletableFuture.runAsync(() -> {
+                    this.redisService.remove(this.getKey(uid));
+                    this.userService.recordUserLog(uid, request, UserEventEnum.LOGOUT);
+                }).thenRunAsync(() -> {
+                    StaticLog.info("用户成功登出:{}", uid);
+                });
+                cookie.setPath("/");
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+            }
         }
-        //删除cookie
-        Cookie cookie = new Cookie(ConfigKey.TICKET, null);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-        this.userService.recordUserLog(uid, request, UserEventEnum.LOGOUT);
     }
 }

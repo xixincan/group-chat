@@ -48,15 +48,15 @@ public class WebAspect {
         this.stopWatch.start();
         try {
             proceed = joinPoint.proceed();
-            this.stopWatch.stop();
-            StaticLog.debug("耗时:{}ms; method return: {}", this.stopWatch.elapsed(TimeUnit.MILLISECONDS), JSONUtil.toJsonStr(proceed));
         } catch (Throwable throwable) {
-            StaticLog.error("method proceed exception:{}", throwable);
+            this.stopWatch.reset();
+            StaticLog.error(throwable);
             //将错误统一封装
             return MyResult.error(9999, throwable.getMessage(), throwable);
-        } finally {
-            this.stopWatch.reset();
         }
+        this.stopWatch.stop();
+        StaticLog.debug("耗时:{}ms; method return: {}", this.stopWatch.elapsed(TimeUnit.MILLISECONDS), JSONUtil.toJsonStr(proceed));
+        this.stopWatch.reset();
         return proceed;
     }
 

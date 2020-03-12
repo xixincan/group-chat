@@ -139,7 +139,7 @@ public class NetUtil {
                 return localAddress;
             }
         } catch (Exception e) {
-            StaticLog.warn("Failed to retriving ip address, " + e.getMessage(), e);
+            StaticLog.warn("Failed to retriving ip address, {}:{}", e.getMessage(), e.getStackTrace());
         }
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -156,17 +156,17 @@ public class NetUtil {
                                         return address;
                                     }
                                 } catch (Exception e) {
-                                    StaticLog.warn("Failed to retriving ip address, " + e.getMessage(), e);
+                                    StaticLog.warn("Failed to retriving ip address,{}:{}", e.getMessage(), e.getStackTrace());
                                 }
                             }
                         }
                     } catch (Exception e) {
-                        StaticLog.warn("Failed to retriving ip address, " + e.getMessage(), e);
+                        StaticLog.warn("Failed to retriving ip address,{}:{}", e.getMessage(), e.getStackTrace());
                     }
                 }
             }
         } catch (Exception e) {
-            StaticLog.warn("Failed to retriving ip address, " + e.getMessage(), e);
+            StaticLog.warn("Failed to retriving ip address,{}:{}", e.getMessage(), e.getStackTrace());
         }
         StaticLog.error("Could not get local host ip address, will use 127.0.0.1 instead.");
         return localAddress;

@@ -11,6 +11,8 @@ public interface ConfigKey {
 
     String TICKET = "ticket";
 
+    String USER_KEY = "user:";
+
     String USER_INFO_KEY = "user_info:";
 
 }

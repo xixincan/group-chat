@@ -1,11 +1,14 @@
 package com.xxc.dao.model;
 
+import com.xxc.dao.base.DynamicTableNameBean;
+import com.xxc.entity.annotation.MultiTable;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 
 @Table(name = "user_log")
-public class UserLog implements Serializable {
+public class UserLog extends DynamicTableNameBean implements Serializable {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -14,6 +17,7 @@ public class UserLog implements Serializable {
      * UID
      */
     @Column(name = "uid")
+    @MultiTable(4)
     private String uid;
 
     /**
@@ -27,12 +31,6 @@ public class UserLog implements Serializable {
      */
     @Column(name = "ipAddr")
     private String ipAddr;
-
-    /**
-     * 群
-     */
-    @Column(name = "gid")
-    private Integer gid;
 
     @Column(name = "created")
     private Date created;
@@ -105,24 +103,6 @@ public class UserLog implements Serializable {
      */
     public void setIpAddr(String ipAddr) {
         this.ipAddr = ipAddr;
-    }
-
-    /**
-     * 获取群
-     *
-     * @return gid - 群
-     */
-    public Integer getGid() {
-        return gid;
-    }
-
-    /**
-     * 设置群
-     *
-     * @param gid 群
-     */
-    public void setGid(Integer gid) {
-        this.gid = gid;
     }
 
     /**

@@ -1,16 +1,16 @@
     function setUserInfo() {
         $.ajax({
             type : 'POST',
-            url : 'chatroom/get_userinfo',
-            dataType: 'json',
+            url : 'user/fetch/info',
+            // dataType: 'json',
             async : true,
                 success: function(data) {
-                    console.log("获取用户信息...");
-                    if (data.status == 200) {
-                        var userInfo = data.data.userInfo;
-                        userId = userInfo.userId;
+                    if (data.code === 200) {
+                        console.log(data);
+                        var userInfo = data.data;
+                        userId = userInfo.uid;
                         $("#username").html(userInfo.username);
-                        $("#avatarUrl").attr("src", userInfo.avatarUrl);
+                        $("#avatarUrl").attr("src", userInfo.avatar);
                         var groupListHTML = "";
                         var groupList = userInfo.groupList;
                         for (var i = 0; i < groupList.length; i++) {
@@ -33,8 +33,8 @@
                             '<li>' + 
                                 '<div class="liLeft"><img src="' + friendList[i].avatarUrl + '"></div>' +
                                     '<div class="liRight">' +
-                                        '<span class="hidden-userId">' + friendList[i].userId + '</span>' + 
-                                        '<span class="intername">' + friendList[i].username + '</span>' + 
+                                        '<span class="hidden-userId">' + friendList[i].uid + '</span>' +
+                                        '<span class="intername">' + friendList[i].nickname + '</span>' +
                                         '<span class="infor"></span>' + 
                                     '</div>' +
                             '</li>';
@@ -44,7 +44,7 @@
                         // 绑定好友框点击事件
                         $('.conLeft ul li').on('click', friendLiClickEvent);
                     } else {
-                        alert(data.msg);
+                        alert(data.message);
                     }
                 }
         });
@@ -70,7 +70,7 @@
             if (!window.WebSocket) {
                   return;
             }
-            if (socket.readyState == WebSocket.OPEN) {
+            if (socket.readyState === WebSocket.OPEN) {
                 var data = {
                     "userId" : userId,
                     "type" : "REGISTER"

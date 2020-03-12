@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 
-@Table(name = "chat_log_0")
+@Table(name = "chat_log")
 public class ChatLog extends DynamicTableNameBean implements Serializable {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,13 +17,13 @@ public class ChatLog extends DynamicTableNameBean implements Serializable {
      * 用户
      */
     @Column(name = "uid")
-    @MultiTable(4)
     private String uid;
 
     /**
      * 群标识
      */
     @Column(name = "gid")
+    @MultiTable(4)
     private Integer gid;
 
     /**

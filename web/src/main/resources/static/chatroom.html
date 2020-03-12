@@ -3,7 +3,6 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>X2C聊天室</title>
-<link rel="icon" href="img/chat.ico" type="image/x-icon" />
 <link rel="stylesheet" type="text/css" href="css/chatroom.css">
 <link rel="stylesheet" type="text/css" href="css/common/layui.css">
 <link rel="stylesheet" type="text/css" href="css/common/bootstrap.min.css">
@@ -134,8 +133,8 @@
         window.WebSocket = window.MozWebSocket;  
     }  
     if(window.WebSocket){
-        // socket = new WebSocket("ws://192.168.0.108:9089");
-        socket = new WebSocket("ws://192.168.148.99:9089");
+        // socket = new WebSocket("ws://192.168.0.108:9089/groupchat");
+        socket = new WebSocket("ws://192.168.148.99:9089/groupchat");
         socket.onmessage = function(event){
             var json = JSON.parse(event.data);    
             if (json.status === 200) {

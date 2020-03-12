@@ -41,7 +41,7 @@ public class DynamicTableNameBean implements IDynamicTableName {
 
                     return tableName.append("_").append(order).toString();
                 } catch (IllegalAccessException e) {
-                    StaticLog.error("动态找分表映射发生异常", e);
+                    StaticLog.error("动态找分表映射发生异常:{}", e.getStackTrace());
                 }
             }
         }

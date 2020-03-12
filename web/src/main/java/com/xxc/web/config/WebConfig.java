@@ -46,11 +46,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(this.accessLimitInterceptor)
-                .excludePathPatterns("/error")
-                .excludePathPatterns("/static/**")
                 .addPathPatterns("/**");
         registry.addInterceptor(this.loginInterceptor)
-                .excludePathPatterns("/error", "/static/**", "/login")
+                .excludePathPatterns("/error", "/static/**", "/login", "/favico.ico")
                 .addPathPatterns("/**");
     }
 }

@@ -28,9 +28,6 @@ spring:
     name: group-chat
   aop:
     proxy-target-class: true
-  mvc:
-    favicon:
-      enabled: false
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     #hikariCP

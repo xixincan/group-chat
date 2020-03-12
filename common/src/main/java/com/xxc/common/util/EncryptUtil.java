@@ -106,4 +106,11 @@ public class EncryptUtil {
         return html;
     }
 
+    public static void main(String[] args) {
+        String s = EncryptUtil.encodeBase64("112233");
+        System.out.println(s);
+        String string = EncryptUtil.decodeBase64ToString(s);
+        System.out.println(string);
+    }
+
 }

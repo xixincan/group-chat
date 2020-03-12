@@ -9,7 +9,6 @@
     <result column="uid" jdbcType="VARCHAR" property="uid" />
     <result column="event" jdbcType="TINYINT" property="event" />
     <result column="ipAddr" jdbcType="VARCHAR" property="ipAddr" />
-    <result column="gid" jdbcType="INTEGER" property="gid" />
     <result column="created" jdbcType="TIMESTAMP" property="created" />
   </resultMap>
 </mapper>

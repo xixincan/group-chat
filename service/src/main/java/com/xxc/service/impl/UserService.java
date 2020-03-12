@@ -1,11 +1,12 @@
 package com.xxc.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
+import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisService;
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.util.TicketUtil;
 import com.xxc.dao.model.*;
 import com.xxc.entity.enums.GroupStatusEnum;
 import com.xxc.entity.enums.UserEventEnum;
@@ -62,23 +63,31 @@ public class UserService implements IUserService {
     @Override
     public UserInfo getUserInfo(HttpServletRequest request) {
         //ticket -> uid
-        String ticket = (String) request.getSession().getAttribute(ConfigKey.TICKET);
-        String userJson = this.redisService.getString(ticket);
-        if (null == userJson) {
+        String ticket = TicketUtil.getTicket(request);
+        if (StrUtil.isEmpty(ticket)) {
             throw new AccessException("请重新登录");
         }
-        String key = ConfigKey.USER_INFO_KEY + ticket;
-        String userInfoJson = this.redisService.getString(key);
-        if (StrUtil.isEmpty(userInfoJson)) {
-            UserInfo userInfo = JSONUtil.toBean(userJson, UserInfo.class);
+        String uid = TicketUtil.getUid(ticket);
+        String userKey = ConfigKey.USER_KEY + uid;
+        String userJson = this.redisService.getString(userKey);
+        if (StrUtil.isEmpty(userJson)) {
+            throw new AccessException("请重新登录");
+        }
+
+        final String userInfoKey = ConfigKey.USER_INFO_KEY + uid;
+        UserInfo cacheInfo = this.redisService.serializeGet(userInfoKey, UserInfo.class);
+
+        if (null == cacheInfo) {
+            StaticLog.info("用户详情缓存未命中:{}", userInfoKey);
+            final UserInfo userInfo = JSONUtil.toBean(userJson, UserInfo.class);
             userInfo.setGroupList(this.findGroups(userInfo.getUid()));
             userInfo.setFriendList(this.findFriends(userInfo.getUid()));
-            CompletableFuture.runAsync(() -> {
-                this.redisService.setString(key, JSONUtil.toJsonStr(userInfo), 2 * 24 * 60 * 60);
-            });
+            CompletableFuture.runAsync(() -> this.redisService.serializeSave(userInfoKey, userInfo, 2 * 24 * 60 * 60))
+                    .thenRunAsync(() -> StaticLog.info("用户详情已经写入缓存:{}", userInfoKey));
+
             return userInfo;
         }
-        return JSONUtil.toBean(userInfoJson, UserInfo.class);
+        return cacheInfo;
     }
 
     @Override
@@ -157,7 +166,6 @@ public class UserService implements IUserService {
         String ipAddr = MyIPUtil.getRemoteIpAddr(request);
         UserLog userLog = new UserLog();
         userLog.setUid(uid);
-        userLog.setGid(null);
         userLog.setEvent(event.getEvent());
         userLog.setIpAddr(ipAddr);
         this.userLogMapper.insertSelective(userLog);

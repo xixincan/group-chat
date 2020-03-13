@@ -8,7 +8,7 @@ package com.xxc.entity.enums;
 public enum ChatTypeEnum {
 
     ERROR(-1),
-    REGISTER(0),
+    BINDING(0),
     SINGLE_SENDING(1),
     GROUP_SENDING(2),
     FILE_MSG_SINGLE_SENDING(3),
@@ -25,10 +25,10 @@ public enum ChatTypeEnum {
         return type;
     }
 
-    public static ChatTypeEnum find(int type) {
+    public static ChatTypeEnum find(Integer type) {
         ChatTypeEnum[] values = ChatTypeEnum.values();
         for (ChatTypeEnum item : values) {
-            if (item.getType() == type) {
+            if (Integer.valueOf(item.getType()).equals(type)) {
                 return item;
             }
         }

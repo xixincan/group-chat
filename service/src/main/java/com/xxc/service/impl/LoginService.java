@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisService;
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.TicketUtil;
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.entity.enums.UserStatusEnum;
@@ -86,7 +87,7 @@ public class LoginService implements ILoginService {
             this.userService.recordUserLog(user.getUid(), request, UserEventEnum.LOGIN);
         });
         //设置cookie
-        Cookie cookie = new Cookie(ConfigKey.TICKET, TicketUtil.genTicket(user.getUid()));
+        Cookie cookie = new Cookie(RedisKey.TICKET, TicketUtil.genTicket(user.getUid()));
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
@@ -94,7 +95,7 @@ public class LoginService implements ILoginService {
     }
 
     private String getKey(String uid) {
-        return ConfigKey.USER_KEY + uid;
+        return RedisKey.USER_KEY + uid;
     }
 
     /**
@@ -107,7 +108,7 @@ public class LoginService implements ILoginService {
         Cookie[] cookies = request.getCookies();
         for (Cookie cookie : cookies) {
             //删除cookie
-            if (ConfigKey.TICKET.equals(cookie.getName())) {
+            if (RedisKey.TICKET.equals(cookie.getName())) {
                 final String uid = TicketUtil.getUid(cookie.getValue());
                 if (StrUtil.isEmpty(uid)) {
                     return;

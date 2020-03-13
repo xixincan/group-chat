@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisService;
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.TicketUtil;
 import com.xxc.dao.model.*;
 import com.xxc.entity.enums.GroupStatusEnum;
@@ -68,13 +69,13 @@ public class UserService implements IUserService {
             throw new AccessException("请重新登录");
         }
         String uid = TicketUtil.getUid(ticket);
-        String userKey = ConfigKey.USER_KEY + uid;
+        String userKey = RedisKey.USER_KEY + uid;
         User cacheUser = this.redisService.serializeGet(userKey, User.class);
         if (null == cacheUser) {
             throw new AccessException("请重新登录");
         }
 
-        final String userInfoKey = ConfigKey.USER_INFO_KEY + uid;
+        final String userInfoKey = RedisKey.USER_INFO_KEY + uid;
         UserInfo cacheInfo = this.redisService.serializeGet(userInfoKey, UserInfo.class);
 
         if (null == cacheInfo) {

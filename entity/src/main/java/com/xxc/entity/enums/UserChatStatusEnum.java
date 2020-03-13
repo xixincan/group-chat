@@ -10,9 +10,10 @@ public enum UserChatStatusEnum {
     //ONLINE > 0
 
     OFFLINE(0),
-    FREE(1),
+    ACTIVE(1),
     LEAVE(2),
     BUSY(3),
+    SLEEP(4)
     ;
 
     private int status;

@@ -1,7 +1,11 @@
 package com.xxc.service;
 
 import com.xxc.entity.msg.ChatMessageEntity;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 消息服务
@@ -12,7 +16,7 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public interface IChatService {
 
-    void handleRegister(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
+    void handleBinding(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
     void handleSingleSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
@@ -24,6 +28,10 @@ public interface IChatService {
 
     void handleExit(ChannelHandlerContext ctx);
 
-    void handleDismatchType(ChannelHandlerContext ctx);
+    Channel getTargetChannel(String targetUid);
+
+    List<Channel> getTargetChannelGroup(Collection<String> uidCollection);
+
+    String getBindUid(Channel channel);
 
 }

@@ -95,4 +95,8 @@ public class RedisService {
     public boolean exist(String key) {
         return Boolean.TRUE.equals(this.redisTemplate.hasKey(key));
     }
+
+    public Long incrementAndGet(String key, long delta) {
+        return this.redisTemplate.opsForValue().increment(key, delta);
+    }
 }

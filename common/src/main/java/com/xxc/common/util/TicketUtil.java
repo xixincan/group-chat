@@ -2,6 +2,7 @@ package com.xxc.common.util;
 
 import cn.hutool.core.util.StrUtil;
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.consts.RedisKey;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +20,7 @@ public class TicketUtil {
             return null;
         }
         for (Cookie cookie : cookies) {
-            if (ConfigKey.TICKET.equals(cookie.getName())) {
+            if (RedisKey.TICKET.equals(cookie.getName())) {
                 return cookie.getValue();
             }
         }

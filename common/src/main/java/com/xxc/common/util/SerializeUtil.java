@@ -23,7 +23,8 @@ public class SerializeUtil {
             oos.writeObject(object);
             return baos.toByteArray();
         } catch (Exception e) {
-            StaticLog.error("对象序列化失败:{}", e.getStackTrace());
+            StaticLog.error("对象序列化失败:{}", e);
+            StaticLog.error(e);
         }
         return null;
     }
@@ -38,7 +39,8 @@ public class SerializeUtil {
             }
             throw new ValidException("反序列化类型不匹配");
         } catch (Exception e) {
-            StaticLog.error("对象反序列化失败:{}", e.getStackTrace());
+            StaticLog.error("对象反序列化失败:{}", e);
+            StaticLog.error(e);
         }
         return null;
     }

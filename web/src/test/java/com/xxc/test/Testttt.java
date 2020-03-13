@@ -2,9 +2,11 @@ package com.xxc.test;
 
 import cn.hutool.json.JSONUtil;
 import com.xxc.common.cache.RedisService;
+import com.xxc.common.consts.ConfigKey;
 import com.xxc.common.util.SerializeUtil;
 import com.xxc.dao.model.User;
 import com.xxc.entity.response.UserInfo;
+import com.xxc.service.IConfigService;
 import com.xxc.service.impl.UserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +25,8 @@ public class Testttt {
 
     @Autowired
     private RedisService redisService;
-
+    @Autowired
+    private IConfigService configService;
     @Autowired
     UserService userService;
 
@@ -52,6 +55,11 @@ public class Testttt {
     public void testUserInfo() {
 //        UserInfo xixincan = this.userService.getUserInfo("xixincan");
 //        System.out.println(JSONUtil.toJsonStr(xixincan));
+    }
+
+    @Test
+    public void tt() {
+        System.out.println(this.configService.getValue(ConfigKey.CHAT_WS_PORT));
     }
 
 }

@@ -11,23 +11,27 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 群聊启动器
- *
+ * <p>
  * Created by xixincan
  * 2020-03-08
+ *
  * @version 1.0.0
  */
 @Component
-public class GroupChatServerBootstrap {
+public class GroupChatServerBootstrap implements ApplicationListener<ContextRefreshedEvent> {
+
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -38,13 +42,20 @@ public class GroupChatServerBootstrap {
     @Resource
     private GroupChatClientInitHandler groupChatClientInitHandler;
 
-    @PostConstruct
-    public void init() {
-        //使用单独的线程去启动
-        CompletableFuture.runAsync(() -> {
-            StaticLog.info("====>>>>开始启动群聊服务<<<<======");
-            this.startServer();
-        });
+    /**
+     * Handle an application event.
+     *
+     * @param event the event to respond to
+     */
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (this.running.compareAndSet(false, true)) {
+            //使用单独的线程去启动
+            CompletableFuture.runAsync(() -> {
+                StaticLog.info("====>>>>开始启动群聊服务<<<<======");
+                this.startServer();
+            });
+        }
     }
 
     private void startServer() {
@@ -83,7 +94,8 @@ public class GroupChatServerBootstrap {
             //监听channel关闭
 //            this.serverChannelFuture.channel().closeFuture().sync();
         } catch (Exception exp) {
-            StaticLog.error("聊天服务遇到问题关闭服务:{}:{}", exp.getStackTrace(), exp);
+            StaticLog.error("聊天服务遇到问题关闭服务:{}", exp.getMessage());
+            StaticLog.error(exp);
             this.bossGroup.shutdownGracefully();
             this.workerGroup.shutdownGracefully();
         }
@@ -99,8 +111,8 @@ public class GroupChatServerBootstrap {
             workerGroupFuture.await();
             StaticLog.warn("====>>>>群聊服务关闭<<<<======");
         } catch (InterruptedException ie) {
-            StaticLog.error("群聊服务关闭遇到问题:{}:{}", ie.getStackTrace(), ie);
+            StaticLog.error("群聊服务关闭遇到问题:{}", ie.getMessage());
+            StaticLog.error(ie);
         }
     }
-
 }

@@ -1,5 +1,6 @@
 package com.xxc.service.impl;
 
+import com.xxc.entity.msg.ChatMessageEntity;
 import com.xxc.service.IChatService;
 import io.netty.channel.ChannelHandlerContext;
 import org.springframework.stereotype.Service;
@@ -14,27 +15,27 @@ public class ChatService implements IChatService {
 
 
     @Override
-    public void handleRegister(ChannelHandlerContext ctx, String frameText) {
+    public void handleRegister(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
         //TODO
     }
 
     @Override
-    public void handleSingleSendMsg(ChannelHandlerContext ctx, String frameText) {
+    public void handleSingleSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
         //TODO
     }
 
     @Override
-    public void handlerGroupSendMsg(ChannelHandlerContext ctx, String frameText) {
+    public void handlerGroupSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
         //TODO
     }
 
     @Override
-    public void handleSingleSendFile(ChannelHandlerContext ctx, String frameText) {
+    public void handleSingleSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
         //TODO
     }
 
     @Override
-    public void handleGroupSendFile(ChannelHandlerContext ctx, String frameText) {
+    public void handleGroupSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
         //TODO
     }
 

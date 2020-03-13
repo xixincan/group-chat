@@ -1,5 +1,6 @@
 package com.xxc.service;
 
+import com.xxc.entity.msg.ChatMessageEntity;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
@@ -11,15 +12,15 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public interface IChatService {
 
-    void handleRegister(ChannelHandlerContext ctx, String frameText);
+    void handleRegister(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
-    void handleSingleSendMsg(ChannelHandlerContext ctx, String frameText);
+    void handleSingleSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
-    void handlerGroupSendMsg(ChannelHandlerContext ctx, String frameText);
+    void handlerGroupSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
-    void handleSingleSendFile(ChannelHandlerContext ctx, String frameText);
+    void handleSingleSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
-    void handleGroupSendFile(ChannelHandlerContext ctx, String frameText);
+    void handleGroupSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
     void handleExit(ChannelHandlerContext ctx);
 

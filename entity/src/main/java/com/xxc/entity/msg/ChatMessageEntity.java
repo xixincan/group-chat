@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 2020-03-12
  * @version 1.0.0
  */
-public class ChatContentEntity implements Serializable {
+public class ChatMessageEntity implements Serializable {
 
     //消息类型
     private Integer type;
@@ -32,7 +32,7 @@ public class ChatContentEntity implements Serializable {
         return type;
     }
 
-    public ChatContentEntity setType(Integer type) {
+    public ChatMessageEntity setType(Integer type) {
         this.type = type;
         return this;
     }
@@ -41,7 +41,7 @@ public class ChatContentEntity implements Serializable {
         return sourceUid;
     }
 
-    public ChatContentEntity setSourceUid(String sourceUid) {
+    public ChatMessageEntity setSourceUid(String sourceUid) {
         this.sourceUid = sourceUid;
         return this;
     }
@@ -50,7 +50,7 @@ public class ChatContentEntity implements Serializable {
         return content;
     }
 
-    public ChatContentEntity setContent(String content) {
+    public ChatMessageEntity setContent(String content) {
         this.content = content;
         return this;
     }
@@ -59,7 +59,7 @@ public class ChatContentEntity implements Serializable {
         return targetUid;
     }
 
-    public ChatContentEntity setTargetUid(String targetUid) {
+    public ChatMessageEntity setTargetUid(String targetUid) {
         this.targetUid = targetUid;
         return this;
     }
@@ -68,7 +68,7 @@ public class ChatContentEntity implements Serializable {
         return targetGid;
     }
 
-    public ChatContentEntity setTargetGid(Integer targetGid) {
+    public ChatMessageEntity setTargetGid(Integer targetGid) {
         this.targetGid = targetGid;
         return this;
     }
@@ -77,7 +77,7 @@ public class ChatContentEntity implements Serializable {
         return fileSize;
     }
 
-    public ChatContentEntity setFileSize(Long fileSize) {
+    public ChatMessageEntity setFileSize(Long fileSize) {
         this.fileSize = fileSize;
         return this;
     }
@@ -86,7 +86,7 @@ public class ChatContentEntity implements Serializable {
         return fileName;
     }
 
-    public ChatContentEntity setFileName(String fileName) {
+    public ChatMessageEntity setFileName(String fileName) {
         this.fileName = fileName;
         return this;
     }
@@ -95,7 +95,7 @@ public class ChatContentEntity implements Serializable {
         return fileURL;
     }
 
-    public ChatContentEntity setFileURL(String fileURL) {
+    public ChatMessageEntity setFileURL(String fileURL) {
         this.fileURL = fileURL;
         return this;
     }

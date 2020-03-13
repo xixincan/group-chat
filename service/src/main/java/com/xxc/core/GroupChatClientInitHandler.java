@@ -47,7 +47,8 @@ public class GroupChatClientInitHandler extends ChannelInitializer<SocketChannel
         // 把HTTP头、HTTP体拼成完整的HTTP请求
         pipeline.addLast(new HttpObjectAggregator(65536));
         //对应websocket，它的数据是以帧frame的形式传递
-        // 可以看到WebsocketFrame下面有6个子类
+        // 可以看到WebsocketFrame有6个子类(对应由IETF发布的WebSocketRFC定义的6种帧)；TextWebSocketFrame是我们唯一真正需要处理的帧类型。
+        // 为了符合 WebSocket RFC，Netty 提供了 WebSocketServerProtocolHandler 来处理其他类型的帧
         // 浏览器请求时：ws://localhost:7000/hello 表示请求的uri
         // WebSocketServerProtocolHandler核心功能是将http协议升级为ws协议，保持长连接
         pipeline.addLast(new WebSocketServerProtocolHandler(this.configService.getValue(ConfigKey.CHAT_WS_URI)));

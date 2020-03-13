@@ -12,7 +12,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import javax.annotation.Resource;
 
 /**
  * @Author: xixincan
@@ -29,6 +32,16 @@ public class Testttt {
     private IConfigService configService;
     @Autowired
     UserService userService;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
+
+    @Test
+    public void y() {
+        Long demo = this.redisTemplate.opsForValue().increment("demo", 1);
+        System.out.println(demo);
+        this.redisService.remove("demo");
+    }
 
     @Test
     public void testRedis() {

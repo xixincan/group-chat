@@ -123,12 +123,15 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        //todo 修正在线人数统计，下线客户端状态
+        Long online = this.redisTool.incrementAndGet(RedisKey.ONLINE_COUNT, -1);
+        this.chatService.handleExit(ctx);
+        String ipAddr = MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString());
+        StaticLog.info("客户端{}下线; 当前在线人数:{}", ipAddr, online);
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        //todo 记录日志，什么也不做
+        //记录日志，什么也不做
     }
 
     @Override
@@ -167,7 +170,8 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         StaticLog.error("catch exp:{}", cause.getMessage());
         StaticLog.error(cause);
-        //todo 抓取到异常情况, 关闭客户端的连接，并清空用户状态
+        //抓取到异常情况, 关闭客户端的连接，
         ctx.close();
+        //todo 并清空用户状态
     }
 }

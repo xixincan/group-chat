@@ -25,6 +25,7 @@ import com.xxc.service.IGroupService;
 import com.xxc.service.IUserService;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -94,6 +95,7 @@ public class ChatService implements IChatService {
         StaticLog.info("用户[{}]在群[{}]发送了消息:{}", messageEntity.getSourceUid(), groupInfo.getGroupId(), messageEntity.getContent());
 
         List<String> uidList = groupInfo.getMembers().stream().map(UserInfo::getUid).collect(Collectors.toList());
+        uidList.remove(messageEntity.getSourceUid());
         List<CompletableFuture> futureList = new ArrayList<>();
         DateTime now = DateUtil.date();
         messageEntity.setTimestamp(DateUtil.formatDateTime(now));
@@ -103,7 +105,7 @@ public class ChatService implements IChatService {
             final Channel channel = BINDING_TABLE.get(item);
             if (null != channel) {
                 futureList.add(
-                        CompletableFuture.runAsync(() -> channel.writeAndFlush(JSONUtil.toJsonStr(messageEntity)), POOL)
+                        CompletableFuture.runAsync(() -> sendMessage(channel, messageEntity), POOL)
                 );
                 sentList.add(item);
             } else {
@@ -129,7 +131,8 @@ public class ChatService implements IChatService {
 
     @Override
     public void handleExit(ChannelHandlerContext ctx) {
-        //TODO
+        String remove = BINDING_TABLE.inverse().remove(ctx.channel());
+        StaticLog.info("用户[{}]下线了", remove);
     }
 
     @Override
@@ -147,6 +150,10 @@ public class ChatService implements IChatService {
     @Override
     public String getBindUid(Channel channel) {
         return BINDING_TABLE.inverse().get(channel);
+    }
+
+    private void sendMessage(Channel channel, ChatMessageEntity message) {
+        channel.writeAndFlush(new TextWebSocketFrame(JSONUtil.toJsonStr(message)));
     }
 
     private void recordMsgAsync(ChatMessageEntity messageEntity,

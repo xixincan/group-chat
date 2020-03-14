@@ -29,6 +29,10 @@ public class ChatMessageEntity implements Serializable {
     private String fileURL;
     //时间戳
     private String timestamp;
+    //code
+    private Integer code = 200;
+    //message
+    private String message = "OK";
 
     public Integer getType() {
         return type;
@@ -108,6 +112,24 @@ public class ChatMessageEntity implements Serializable {
 
     public ChatMessageEntity setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+        return this;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public ChatMessageEntity setCode(Integer code) {
+        this.code = code;
+        return this;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public ChatMessageEntity setMessage(String message) {
+        this.message = message;
         return this;
     }
 }

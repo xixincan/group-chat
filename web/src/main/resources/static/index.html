@@ -12,10 +12,10 @@
 <div class="qqBox">
     <div class="BoxHead">
         <div class="headImg">
-            <img id="avatarUrl" src="img/avatar/Group01.jpg"/>
+            <img id="avatarUrl"/>
         </div>
         <div id="username" class="internetName"></div>
-        <button class="close logout" onclick="logout()">&times;</button>
+        <button class="close logout" onclick="logout()" style="font-size: 16px;color: red">关闭</button>
     </div>
     <div class="context">
         <div class="conLeft">
@@ -125,7 +125,6 @@
 <script type="text/javascript">
     initChatURI();
     initUserInfo();
-    initSentMessageMap();
     startConnectChatServer();
 </script>
 

@@ -306,7 +306,7 @@ transform: scale(1.2);
 }
 .logout {
 	margin-left: 625px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     opacity: 0.5 !important;
 }
 .file-upload {

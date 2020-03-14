@@ -44,7 +44,7 @@ function initUserInfo() {
                         '<div class="liLeft"><img src="' + groupList[i].groupAvatarUrl + '"></div>' +
                         '<div class="liRight">' +
                         '<span class="hidden-groupId">' + groupList[i].groupId + '</span>' +
-                        '<span class="intername">' + groupList[i].groupName + '</span>' +
+                        '<span class="intername">' + groupList[i].groupName + '(' + groupList[i].members.length + ')</span>' +
                         '<span class="infor"></span>' +
                         '</div>' +
                         '</li>';
@@ -56,7 +56,7 @@ function initUserInfo() {
                 for (var i = 0; i < friendList.length; i++) {
                     friendListHTML +=
                         '<li>' +
-                        '<div class="liLeft"><img src="' + friendList[i].avatarUrl + '"></div>' +
+                        '<div class="liLeft"><img src="' + friendList[i].avatar + '"></div>' +
                         '<div class="liRight">' +
                         '<span class="hidden-userId">' + friendList[i].uid + '</span>' +
                         '<span class="intername">' + friendList[i].nickname + '</span>' +
@@ -64,6 +64,8 @@ function initUserInfo() {
                         '</div>' +
                         '</li>';
                 }
+                //
+                initSentMessageMap(data.data);
                 // 设置好友列表
                 $('.conLeft ul').append(friendListHTML);
                 // 绑定好友框点击事件
@@ -75,18 +77,21 @@ function initUserInfo() {
     });
 }
 
-function initSentMessageMap() {
+function initSentMessageMap(data) {
     sentMessageMap = new SentMessageMap();
-    sentMessageMap.put("001", new Array());
-    sentMessageMap.put("002", new Array());
-    sentMessageMap.put("003", new Array());
-    sentMessageMap.put("004", new Array());
-    sentMessageMap.put("005", new Array());
-    sentMessageMap.put("006", new Array());
-    sentMessageMap.put("007", new Array());
-    sentMessageMap.put("008", new Array());
-    sentMessageMap.put("009", new Array());
-    sentMessageMap.put("01", new Array());
+    var groupList = data.groupList;
+    if (groupList && groupList.length > 0) {
+        for (var i = 0; i < groupList.length; i++) {
+            sentMessageMap.put(groupList[i].groupId, []);
+        }
+    }
+    var friendList = data.friendList;
+    if (friendList && friendList.length > 0) {
+        for (var i = 0; i < friendList.length; i++) {
+            sentMessageMap.put(friendList[i].uid, []);
+        }
+    }
+    console.log(sentMessageMap);
 }
 
 function startConnectChatServer() {
@@ -101,31 +106,31 @@ function startConnectChatServer() {
         socket = new WebSocket(chaturi);
         socket.onmessage = function (event) {
             var json = JSON.parse(event.data);
-            if (json.status === 200) {
-                var type = json.data.type;
+            if (json.code === 200) {
+                var type = json.type;
                 console.log("收到一条新信息，类型为：" + type);
                 switch (type) {
                     case 0:
                         ws.registerReceive();
                         break;
                     case 1:
-                        ws.singleReceive(json.data);
+                        ws.singleReceive(json);
                         break;
                     case 2:
-                        ws.groupReceive(json.data);
+                        ws.groupReceive(json);
                         break;
                     case 3:
-                        ws.fileMsgSingleRecieve(json.data);
+                        ws.fileMsgSingleRecieve(json);
                         break;
                     case 4:
-                        ws.fileMsgGroupRecieve(json.data);
+                        ws.fileMsgGroupRecieve(json);
                         break;
                     default:
                         console.log("不正确的类型！");
                 }
             } else {
-                alert(json.msg);
-                console.log(json.msg);
+                alert(json.message);
+                console.log(json.message);
             }
         };
 
@@ -248,7 +253,7 @@ var ws = {
                     .siblings(".liLeft").children('img').attr("src");
                 $receiveLi = $(this).parent(".liRight").parent("li");
             }
-        })
+        });
         var answer = '';
         answer += '<li>' +
             '<div class="answers">' + content + '</div>' +
@@ -397,6 +402,8 @@ function logout() {
             window.location.href = data;
         }
     });
+    console.log("登出成功2222！");
+    window.location.href = "/login.html";
 }
 
 $(".myfile").fileinput({
@@ -495,9 +502,8 @@ $('.sendBtn').on('click', function () {
     }
     if (news == '') {
         alert('消息不能为空');
-        return;
     } else {
-        if (toUserId.length != 0) {
+        if (toUserId.length !== 0) {
             ws.singleSend(toUserId, news);
         } else {
             ws.groupSend(toGroupId, news);
@@ -518,7 +524,7 @@ $('.sendBtn').on('click', function () {
         var $sendLi = $('.conLeft').find('li.bg');
         processFriendList.sending(news, $sendLi);
     }
-})
+});
 
 $('.ExP').on('mouseenter', function () {
     $('.emjon').show();

@@ -104,9 +104,11 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
                 this.chatService.handleBinding(ctx, messageEntity);
                 break;
             case GROUP_SENDING:
+            case EMOJI_GROUP_SENDING:
                 this.chatService.handlerGroupSendMsg(ctx, messageEntity);
                 break;
             case SINGLE_SENDING:
+            case EMOJI_SINGLE_SENDING:
                 this.chatService.handleSingleSendMsg(ctx, messageEntity);
                 break;
             case FILE_MSG_GROUP_SENDING:

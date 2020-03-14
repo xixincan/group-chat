@@ -280,12 +280,12 @@ var ws = {
                     .siblings(".liLeft").children('img').attr("src");
                 /* $receiveLi = $(this).parent(".liRight").parent("li"); */
             }
-        })
+        });
         $('.conLeft').find('span.hidden-groupId').each(function () {
             if (this.innerHTML == toGroupId) {
                 $receiveLi = $(this).parent(".liRight").parent("li");
             }
-        })
+        });
         var answer = '';
         answer += '<li>' +
             '<div class="answers">' + content + '</div>' +
@@ -546,9 +546,9 @@ $('.emjon li').on('click', function () {
         return;
     }
     if (toUserId.length != 0) {
-        ws.singleSend(fromUserId, toUserId, content);
+        ws.singleSend(toUserId, content);
     } else {
-        ws.groupSend(fromUserId, toGroupId, content);
+        ws.groupSend(toGroupId, content);
     }
     var avatarUrl = $('#avatarUrl').attr("src");
     var msg = '';

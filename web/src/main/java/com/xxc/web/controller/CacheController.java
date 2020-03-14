@@ -3,6 +3,7 @@ package com.xxc.web.controller;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.util.MyIPUtil;
+import com.xxc.entity.annotation.SkipLoginCheck;
 import com.xxc.entity.exp.AccessException;
 import com.xxc.entity.result.MyResult;
 import com.xxc.service.IConfigService;
@@ -29,6 +30,7 @@ public class CacheController {
     @Resource
     private IIpPlanService ipPlanService;
 
+    @SkipLoginCheck
     @RequestMapping(value = "reload", method = {RequestMethod.GET, RequestMethod.POST})
     public String reload(HttpServletRequest request, String key) {
         if (MyIPUtil.isLocalHost(MyIPUtil.getRemoteIpAddr(request))) {
@@ -47,6 +49,7 @@ public class CacheController {
         throw new AccessException("Access Denied.");
     }
 
+    @SkipLoginCheck
     @RequestMapping(value = "get", method = {RequestMethod.GET, RequestMethod.POST})
     public MyResult<String> get(String key) {
         return MyResult.success(this.configService.getValue(key));

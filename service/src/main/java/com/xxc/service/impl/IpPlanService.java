@@ -71,7 +71,17 @@ public class IpPlanService implements IIpPlanService {
 
     @Override
     public boolean isWhite(String ipAddr) {
-        return this.getWhiteList().contains(ipAddr);
+        List<String> whiteList = this.getWhiteList();
+        boolean contains = whiteList.contains(ipAddr);
+        if (contains) {
+            return true;
+        }
+        for (String ip : whiteList) {
+            if (ip.endsWith("*")) {
+                return ipAddr.startsWith(ip.replace("*", ""));
+            }
+        }
+        return false;
     }
 
     @Override

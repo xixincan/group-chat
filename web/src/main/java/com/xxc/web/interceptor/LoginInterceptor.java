@@ -38,6 +38,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         //获取访问的真实ip
         String ipAddr = MyIPUtil.getRemoteIpAddr(request);
         if (!this.ipPlanService.checkIpAddr(ipAddr)) {
+            response.sendRedirect("/error/401.html");
             return false;
         }
 

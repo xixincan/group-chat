@@ -1,6 +1,7 @@
 package com.xxc.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
@@ -45,7 +46,9 @@ public class ChatService implements IChatService {
     //用户与客户端连接的双向注册表 uid <--> channel
     private static final BiMap<String, Channel> BINDING_TABLE = HashBiMap.create();
 
-    private static final ExecutorService POOL = new ThreadPoolExecutor(32, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(65536));
+    private static final ExecutorService POOL = new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(65536));
+
+    private static final ExecutorService TASK = new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(65536));
 
     @Resource
     private RedisTool redisTool;
@@ -88,7 +91,7 @@ public class ChatService implements IChatService {
             StaticLog.warn("没有找到对应的群:gid={}", targetGid);
             return;
         }
-        StaticLog.info("用户[{}]像群[{}]发送了消息:{}", messageEntity.getSourceUid(), groupInfo.getGroupId(), messageEntity.getContent());
+        StaticLog.info("用户[{}]在群[{}]发送了消息:{}", messageEntity.getSourceUid(), groupInfo.getGroupId(), messageEntity.getContent());
 
         List<String> uidList = groupInfo.getMembers().stream().map(UserInfo::getUid).collect(Collectors.toList());
         List<CompletableFuture> futureList = new ArrayList<>();
@@ -106,10 +109,11 @@ public class ChatService implements IChatService {
             } else {
                 //记录消息未发送的成员；待上线后发送
                 unsentList.add(item);
-                StaticLog.info("用户[{}]未上线，消息将延迟发送");
             }
         });
-        this.recordMsgAsync(messageEntity, sentList, unsentList, MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString()));
+
+        String channelRemoteIP = MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString());
+        this.recordMsgAsync(messageEntity, sentList, unsentList, channelRemoteIP);
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
     }
 
@@ -161,10 +165,10 @@ public class ChatService implements IChatService {
             record.setFileName(messageEntity.getFileName());
             record.setFileSize(messageEntity.getFileSize());
             record.setFileURL(messageEntity.getFileURL());
-            record.setTime(DateUtil.parseTime(messageEntity.getTimestamp()).getTime());
+            record.setTime(DateUtil.parse(messageEntity.getTimestamp(), DatePattern.NORM_DATETIME_PATTERN).getTime());
             record.setIpAddr(channelRemoteIP);
-            this.msgLogMapper.insertSelective(record);
 
+            this.msgLogMapper.insertSelective(record);
             UserMsg userMsg = new UserMsg();
             userMsg.setMid(mid);
             if (CollectionUtil.isNotEmpty(sentUidList)) {
@@ -177,6 +181,7 @@ public class ChatService implements IChatService {
                 });
             }
             if (CollectionUtil.isNotEmpty(unsentUidList)) {
+                StaticLog.info("[{}]用户未上线，消息[{}]将延迟发送", unsentUidList.size(), mid);
                 userMsg.setSent(Boolean.FALSE);
                 unsentUidList.forEach(item -> {
                     userMsg.setId(null);
@@ -185,7 +190,7 @@ public class ChatService implements IChatService {
                     this.userMsgMapper.insertSelective(userMsg);
                 });
             }
-        }, POOL);
+        }, TASK);
     }
 
 }

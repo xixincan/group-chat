@@ -1,7 +1,9 @@
 package com.xxc.web.listener;
 
 import cn.hutool.log.StaticLog;
+import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.consts.RedisKey;
 import com.xxc.core.GroupChatClientInitHandler;
 import com.xxc.service.IConfigService;
 import io.netty.bootstrap.ServerBootstrap;
@@ -38,6 +40,8 @@ public class GroupChatServerBootstrap implements ApplicationListener<ContextRefr
     private EventLoopGroup workerGroup;
     private ChannelFuture serverChannelFuture;
 
+    @Resource
+    private RedisTool redisTool;
     @Resource
     private IConfigService configService;
     @Resource
@@ -96,6 +100,7 @@ public class GroupChatServerBootstrap implements ApplicationListener<ContextRefr
             ChannelFuture closeFuture = this.serverChannelFuture.channel().closeFuture();
             closeFuture.addListener((GenericFutureListener<? extends Future<? super Void>>) future -> {
                 if (future.isSuccess()) {
+                    this.redisTool.remove(RedisKey.ONLINE_COUNT);
                     StaticLog.info("====>>>>群聊服务关闭<<<<======");
                 }
             });

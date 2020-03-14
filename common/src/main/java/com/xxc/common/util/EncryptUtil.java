@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 /**
  * @author xixincan
@@ -39,7 +40,9 @@ public class EncryptUtil {
             return input;
         }
     }
-
+    public static String genRandomID() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
     /**
      * Base64编码.
      */

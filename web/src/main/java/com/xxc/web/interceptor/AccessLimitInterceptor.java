@@ -3,10 +3,12 @@ package com.xxc.web.interceptor;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
 import com.google.common.util.concurrent.RateLimiter;
+import com.xxc.common.consts.ConfigKey;
 import com.xxc.entity.annotation.AccessLimit;
-import com.xxc.common.cache.RedisService;
+import com.xxc.common.cache.RedisTool;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.result.MyResult;
+import com.xxc.service.IConfigService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.AsyncHandlerInterceptor;
@@ -27,12 +29,12 @@ import java.lang.reflect.Method;
 @Component
 public class AccessLimitInterceptor implements HandlerInterceptor {
 
-    private String ACCESS = "access:";
-
-    private static final RateLimiter RATE_LIMITER = RateLimiter.create(10d);
-
+    @SuppressWarnings("UnstableApiUsage")
+    private RateLimiter rateLimiter;
     @Resource
-    private RedisService redisService;
+    private RedisTool redisTool;
+    @Resource
+    private IConfigService configService;
 
     /**
      * Intercept the execution of a handler. Called after HandlerMapping determined
@@ -52,10 +54,9 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
      * @return {@code true} if the execution chain should proceed with the
      * next interceptor or the handler itself. Else, DispatcherServlet assumes
      * that this interceptor has already dealt with the response itself.
-     * @throws Exception in case of errors
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
@@ -65,28 +66,32 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
                     int limit = accessLimit.limit();
                     int second = accessLimit.second();
                     String ipAddr = MyIPUtil.getRemoteIpAddr(request);
-                    String key = ACCESS + ipAddr + request.getRequestURI();
-                    Integer currentValue = this.redisService.getInteger(key);
+                    String key = ConfigKey.ACCESS + ipAddr + request.getRequestURI();
+                    Integer currentValue = this.redisTool.getInteger(key);
                     if (null == currentValue) {
-                        this.redisService.setInteger(key, 1, second);
+                        this.redisTool.setInteger(key, 1, second);
                     } else {
                         if (currentValue >= limit) {
                             StaticLog.warn("{}请求太频繁!", key);
                             this.response(response, "请求过于频繁！");
                             return false;
                         }
-                        if (!RATE_LIMITER.tryAcquire()) {
+                        if (null == this.rateLimiter) {
+                            //noinspection UnstableApiUsage
+                            this.rateLimiter = RateLimiter.create(this.configService.getDoubleValue(ConfigKey.RATE_LIMIT));
+                        }
+                        if (!this.rateLimiter.tryAcquire()) {
                             String msg = "服务器繁忙，请稍后再试!";
                             StaticLog.warn(msg);
                             this.response(response, msg);
                             return false;
                         }
-                        this.redisService.setInteger(key, currentValue + 1, second);
+                        this.redisTool.setInteger(key, currentValue + 1, second);
                     }
                 }
             }
+            StaticLog.info("AccessLimitInterceptor executed: {}", request.getRequestURL());
         }
-        StaticLog.info("com.xxc.web.interceptor.AccessLimitInterceptor.preHandle executed...{}", request.getRequestURL());
         return true;
     }
 
@@ -120,10 +125,9 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
      * @param handler  handler (or {@link HandlerMethod}) that started asynchronous
      *                 execution, for type and/or instance examination
      * @param ex       exception thrown on handler execution, if any
-     * @throws Exception in case of errors
      */
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 //        StaticLog.info("^^^^^&&&&{}", "------- AccessLimitInterceptor - afterCompletion --------");
     }
 }

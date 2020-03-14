@@ -3,7 +3,7 @@ package com.xxc.core;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
-import com.xxc.common.cache.RedisService;
+import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.enums.ChatTypeEnum;
@@ -57,7 +57,7 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
     @Resource
     private IIpPlanService ipPlanService;
     @Resource
-    private RedisService redisService;
+    private RedisTool redisTool;
     @Resource
     private IChatService chatService;
 
@@ -81,10 +81,10 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
         String ipAddr = MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString());
         //根据config表中配置的IP执行拒绝计划
         if (!this.ipPlanService.checkIpAddr(ipAddr)) {
-            this.redisService.incrementAndGet(RedisKey.REFUSE_COUNT, 1);
+            this.redisTool.incrementAndGet(RedisKey.REFUSE_COUNT, 1);
             throw new AccessException("Access Denied!");
         }
-        Long online = this.redisService.incrementAndGet(RedisKey.ONLINE_COUNT, 1);
+        Long online = this.redisTool.incrementAndGet(RedisKey.ONLINE_COUNT, 1);
         StaticLog.info("客户端{}成功连接; 当前在线人数:{}", ipAddr, online);
     }
 

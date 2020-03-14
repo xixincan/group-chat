@@ -7,6 +7,10 @@ package com.xxc.common.consts;
  */
 public interface ConfigKey {
 
+    String ACCESS = "access:";
+
+    String RATE_LIMIT = "access_rate_limit";
+
     String CHAT_WS_HOST = "chat_ws_host";
 
     String CHAT_WS_PORT = "chat_ws_port";

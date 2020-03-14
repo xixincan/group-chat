@@ -2,7 +2,6 @@ package com.xxc.service;
 
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.dao.model.User;
-import com.xxc.entity.response.GroupInfo;
 import com.xxc.entity.response.UserInfo;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,22 +23,12 @@ public interface IUserService {
     /**
      * 获取用户信息（获取用户自身的）
      */
-    UserInfo getUserInfo(HttpServletRequest request);
+    UserInfo getSelfUserInfo(HttpServletRequest request);
 
     /**
-     * 获取用户好友
+     * 获取用户简要信息
      */
-    List<UserInfo> findFriends(String uid);
-
-    /**
-     * 获取用户群组
-     */
-    List<GroupInfo> findGroups(String uid);
-
-    /**
-     * 获取群成员
-     */
-    List<UserInfo> findMembers(Integer gid);
+    UserInfo getUserSimpleInfo(String uid);
 
     /**
      * 获取用户简要信息（获取其他用户的）

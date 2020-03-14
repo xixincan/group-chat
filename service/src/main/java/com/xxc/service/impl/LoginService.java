@@ -1,10 +1,8 @@
 package com.xxc.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
-import com.xxc.common.cache.RedisService;
-import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.TicketUtil;
 import com.xxc.entity.enums.UserEventEnum;
@@ -33,7 +31,7 @@ public class LoginService implements ILoginService {
     @Resource
     private IUserService userService;
     @Resource
-    private RedisService redisService;
+    private RedisTool redisTool;
 
     /**
      * 登录校验
@@ -46,7 +44,7 @@ public class LoginService implements ILoginService {
         String ticket = TicketUtil.getTicket(request);
         if (StrUtil.isNotEmpty(ticket)) {
             String uid = TicketUtil.getUid(ticket);
-            return this.redisService.exist(this.getKey(uid));
+            return this.redisTool.exist(this.getKey(uid));
         }
         return false;
     }
@@ -64,7 +62,7 @@ public class LoginService implements ILoginService {
         if (StrUtil.isNotEmpty(ticket)) {
             //请求携带了ticket，查看是否已经登录过了
             String uid = TicketUtil.getUid(ticket);
-            User user = this.redisService.serializeGet(this.getKey(uid), User.class);
+            User user = this.redisTool.serializeGet(this.getKey(uid), User.class);
             if (null != user) {
                 if (!StrUtil.equals(userLoginForm.getPassword(), user.getPassword())) {
                     throw new ValidException("用户名或密码错误");
@@ -83,7 +81,7 @@ public class LoginService implements ILoginService {
         }
         //添加redis缓存登录信息
         CompletableFuture.runAsync(() -> {
-            this.redisService.serializeSave(this.getKey(user.getUid()), user, 24 * 60 * 60);
+            this.redisTool.serializeSave(this.getKey(user.getUid()), user, 24 * 60 * 60);
             this.userService.recordUserLog(user.getUid(), request, UserEventEnum.LOGIN);
         });
         //设置cookie
@@ -95,7 +93,7 @@ public class LoginService implements ILoginService {
     }
 
     private String getKey(String uid) {
-        return RedisKey.USER_KEY + uid;
+        return RedisKey.USER_DIR + uid;
     }
 
     /**
@@ -115,7 +113,7 @@ public class LoginService implements ILoginService {
                 }
                 CompletableFuture
                         .runAsync(() -> {
-                            this.redisService.remove(this.getKey(uid));
+                            this.redisTool.remove(this.getKey(uid));
                             this.userService.recordUserLog(uid, request, UserEventEnum.LOGOUT);
                         })
                         .thenRunAsync(() -> StaticLog.info("用户成功登出:{}", uid));

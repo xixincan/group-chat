@@ -27,6 +27,8 @@ public class ChatMessageEntity implements Serializable {
     private String fileName;
     //文件地址（传文件）
     private String fileURL;
+    //时间戳
+    private String timestamp;
 
     public Integer getType() {
         return type;
@@ -97,6 +99,15 @@ public class ChatMessageEntity implements Serializable {
 
     public ChatMessageEntity setFileURL(String fileURL) {
         this.fileURL = fileURL;
+        return this;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public ChatMessageEntity setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
         return this;
     }
 }

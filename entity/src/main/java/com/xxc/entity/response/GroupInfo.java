@@ -13,7 +13,9 @@ public class GroupInfo implements Serializable {
     private Integer groupId;
     private String groupName;
     private String groupAvatarUrl;
+    private String owner;
     private List<UserInfo> members;
+    private String created;
 
     public Integer getGroupId() {
         return groupId;
@@ -42,12 +44,30 @@ public class GroupInfo implements Serializable {
         return this;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public GroupInfo setOwner(String owner) {
+        this.owner = owner;
+        return this;
+    }
+
     public List<UserInfo> getMembers() {
         return members;
     }
 
     public GroupInfo setMembers(List<UserInfo> members) {
         this.members = members;
+        return this;
+    }
+
+    public String getCreated() {
+        return created;
+    }
+
+    public GroupInfo setCreated(String created) {
+        this.created = created;
         return this;
     }
 }

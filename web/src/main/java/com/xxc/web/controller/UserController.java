@@ -27,7 +27,7 @@ public class UserController {
     @PostMapping("fetch/info")
     @ResponseBody
     public MyResult<UserInfo> getUserInfo(HttpServletRequest request) {
-        return MyResult.success(this.userService.getUserInfo(request));
+        return MyResult.success(this.userService.getSelfUserInfo(request));
     }
 
 }

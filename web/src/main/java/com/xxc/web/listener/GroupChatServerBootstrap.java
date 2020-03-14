@@ -11,6 +11,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -92,7 +93,12 @@ public class GroupChatServerBootstrap implements ApplicationListener<ContextRefr
             });
 
             //监听channel关闭
-//            this.serverChannelFuture.channel().closeFuture().sync();
+            ChannelFuture closeFuture = this.serverChannelFuture.channel().closeFuture();
+            closeFuture.addListener((GenericFutureListener<? extends Future<? super Void>>) future -> {
+                if (future.isSuccess()) {
+                    StaticLog.info("====>>>>群聊服务关闭<<<<======");
+                }
+            });
         } catch (Exception exp) {
             StaticLog.error("聊天服务遇到问题关闭服务:{}", exp.getMessage());
             StaticLog.error(exp);
@@ -109,7 +115,6 @@ public class GroupChatServerBootstrap implements ApplicationListener<ContextRefr
         try {
             bossGroupFuture.await();
             workerGroupFuture.await();
-            StaticLog.warn("====>>>>群聊服务关闭<<<<======");
         } catch (InterruptedException ie) {
             StaticLog.error("群聊服务关闭遇到问题:{}", ie.getMessage());
             StaticLog.error(ie);

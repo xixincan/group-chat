@@ -4,19 +4,17 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
-import com.xxc.common.cache.RedisService;
-import com.xxc.common.consts.ConfigKey;
+import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.TicketUtil;
 import com.xxc.dao.model.*;
-import com.xxc.entity.enums.GroupStatusEnum;
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.entity.enums.UserStatusEnum;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.dao.mapper.*;
 import com.xxc.entity.exp.AccessException;
-import com.xxc.entity.response.GroupInfo;
 import com.xxc.entity.response.UserInfo;
+import com.xxc.service.IGroupService;
 import com.xxc.service.IUserService;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -36,17 +34,15 @@ import java.util.stream.Collectors;
 public class UserService implements IUserService {
 
     @Resource
-    private RedisService redisService;
+    private RedisTool redisTool;
+    @Resource
+    private IGroupService groupService;
     @Resource
     private UserMapper userMapper;
     @Resource
     private UserRelationMapper userRelationMapper;
     @Resource
     private UserLogMapper userLogMapper;
-    @Resource
-    private GroupMapper groupMapper;
-    @Resource
-    private GroupRelationMapper groupRelationMapper;
 
     @Override
     public User getUser(String username) {
@@ -62,30 +58,30 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserInfo getUserInfo(HttpServletRequest request) {
+    public UserInfo getSelfUserInfo(HttpServletRequest request) {
         //ticket -> uid
         String ticket = TicketUtil.getTicket(request);
         if (StrUtil.isEmpty(ticket)) {
             throw new AccessException("请重新登录");
         }
         String uid = TicketUtil.getUid(ticket);
-        String userKey = RedisKey.USER_KEY + uid;
-        User cacheUser = this.redisService.serializeGet(userKey, User.class);
+        String userKey = RedisKey.USER_DIR + uid;
+        User cacheUser = this.redisTool.serializeGet(userKey, User.class);
         if (null == cacheUser) {
             throw new AccessException("请重新登录");
         }
 
-        final String userInfoKey = RedisKey.USER_INFO_KEY + uid;
-        UserInfo cacheInfo = this.redisService.serializeGet(userInfoKey, UserInfo.class);
+        final String userInfoKey = RedisKey.USER_INFO_DIR + uid;
+        UserInfo cacheInfo = this.redisTool.serializeGet(userInfoKey, UserInfo.class);
 
         if (null == cacheInfo) {
             StaticLog.info("用户详情缓存未命中:{}", userInfoKey);
             final UserInfo userInfo = new UserInfo();
             BeanUtil.copyProperties(cacheUser, userInfo);
-            userInfo.setGroupList(this.findGroups(userInfo.getUid()));
+            userInfo.setGroupList(this.groupService.findGroups(userInfo.getUid()));
             userInfo.setFriendList(this.findFriends(userInfo.getUid()));
             CompletableFuture
-                    .runAsync(() -> this.redisService.serializeSave(userInfoKey, userInfo, 7 * 24 * 60 * 60))
+                    .runAsync(() -> this.redisTool.serializeSave(userInfoKey, userInfo, 7 * 24 * 60 * 60))
                     .thenRunAsync(() -> StaticLog.info("用户详情已经写入缓存:{}", userInfoKey));
 
             return userInfo;
@@ -93,8 +89,7 @@ public class UserService implements IUserService {
         return cacheInfo;
     }
 
-    @Override
-    public List<UserInfo> findFriends(String uid) {
+    private List<UserInfo> findFriends(String uid) {
         Example example = new Example(UserRelation.class);
         example.selectProperties("uid", "fuid");
         example.createCriteria().andEqualTo("uid", uid).orEqualTo("fuid", uid);
@@ -110,59 +105,53 @@ public class UserService implements IUserService {
 //        return this.getUserSimpleInfoList(uidSet);
     }
 
+    /**
+     * 获取用户简要信息
+     */
     @Override
-    public List<GroupInfo> findGroups(String uid) {
-        Example example = new Example(GroupRelation.class);
-        example.selectProperties("gid");
-        example.createCriteria().andEqualTo("uid", uid).andEqualTo("valid", Boolean.TRUE);
-        List<GroupRelation> groupRelationList = this.groupRelationMapper.selectByExample(example);
-        List<GroupInfo> groupInfoList = new ArrayList<>();
-        if (CollectionUtil.isEmpty(groupRelationList)) {
-            return groupInfoList;
+    public UserInfo getUserSimpleInfo(String uid) {
+        String infoKey = RedisKey.USER_INFO_DIR + uid;
+        UserInfo result = new UserInfo();
+        UserInfo cacheInfo = this.redisTool.serializeGet(infoKey, UserInfo.class);
+        if (null == cacheInfo) {
+            Example example = new Example(User.class);
+            example.selectProperties("uid", "nickname", "avatar", "age", "sex");
+            example.createCriteria().andEqualTo("uid", uid).andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
+            List<User> userList = this.userMapper.selectByExample(example);
+            if (CollectionUtil.isEmpty(userList)) {
+                return null;
+            }
+            User user = userList.get(0);
+            return result.setUid(uid)
+                    .setNickname(user.getNickname())
+                    .setAvatar(user.getAvatar())
+                    .setSex(user.getSex())
+                    .setAge(user.getAge());
         }
-
-        List<Integer> gidList = groupRelationList.stream().map(GroupRelation::getGid).collect(Collectors.toList());
-        example = new Example(Group.class);
-        example.createCriteria().andIn("id", gidList).andEqualTo("status", GroupStatusEnum.NORMAL.getStatus());
-        List<Group> groupList = this.groupMapper.selectByExample(example);
-        groupList.forEach(item -> groupInfoList.add(
-                new GroupInfo()
-                        .setGroupId(item.getId())
-                        .setGroupName(item.getName())
-                        .setGroupAvatarUrl(item.getAvatar())
-                        .setMembers(this.findMembers(item.getId()))
-                )
-        );
-
-        return groupInfoList;
-    }
-
-    @Override
-    public List<UserInfo> findMembers(Integer gid) {
-        Example example = new Example(GroupRelation.class);
-        example.selectProperties("uid");
-        example.createCriteria().andEqualTo("gid", gid).andEqualTo("valid", Boolean.TRUE);
-        List<GroupRelation> groupRelations = this.groupRelationMapper.selectByExample(example);
-        List<String> uidList = groupRelations.stream().map(GroupRelation::getUid).collect(Collectors.toList());
-        return this.getUserSimpleInfoList(uidList);
+        return result.setUid(uid)
+                .setNickname(cacheInfo.getNickname())
+                .setAvatar(cacheInfo.getAvatar())
+                .setAge(cacheInfo.getAge())
+                .setSex(cacheInfo.getSex());
     }
 
     @Override
     public List<UserInfo> getUserSimpleInfoList(Collection<String> uidList) {
-        //todo 优化-> 先从缓存中取user转换成UserInfo
+        List<UserInfo> userSimpleInfoList = new ArrayList<>();
         Example example = new Example(User.class);
         example.selectProperties("uid", "nickname", "avatar", "age", "sex");
         example.createCriteria().andIn("uid", uidList).andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
         List<User> userList = this.userMapper.selectByExample(example);
-        List<UserInfo> userSimpleInfoList = new ArrayList<>();
-        userList.forEach(item ->
-                userSimpleInfoList.add(new UserInfo()
-                        .setUid(item.getUid())
-                        .setNickname(item.getNickname())
-                        .setAvatar(item.getAvatar())
-                        .setAge(item.getAge())
-                        .setSex(item.getSex()))
-        );
+        if (CollectionUtil.isNotEmpty(userList)) {
+            userList.forEach(item ->
+                    userSimpleInfoList.add(new UserInfo()
+                            .setUid(item.getUid())
+                            .setNickname(item.getNickname())
+                            .setAvatar(item.getAvatar())
+                            .setAge(item.getAge())
+                            .setSex(item.getSex()))
+            );
+        }
         return userSimpleInfoList;
     }
 

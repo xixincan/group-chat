@@ -10,9 +10,11 @@ public interface RedisKey {
 
     String TICKET = "ticket";
 
-    String USER_KEY = "user:";
+    String USER_DIR = "user:";
 
-    String USER_INFO_KEY = "user_info:";
+    String USER_INFO_DIR = "user_info:";
+
+    String GROUP_INFO_DIR = "group_info:";
 
     String ONLINE_COUNT = "online_count";
 

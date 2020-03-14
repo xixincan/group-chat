@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * @Version 1.0
  */
 @Service
-public class RedisService {
+public class RedisTool {
 
     /**
      * 这里不能使用 Autowired 注解

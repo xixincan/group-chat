@@ -120,10 +120,16 @@ function startConnectChatServer() {
                         ws.groupReceive(json);
                         break;
                     case 3:
-                        ws.fileMsgSingleRecieve(json);
+                        ws.fileMsgSingleReceive(json);
                         break;
                     case 4:
-                        ws.fileMsgGroupRecieve(json);
+                        ws.fileMsgGroupReceive(json);
+                        break;
+                    case 5:
+                        ws.singleEmojiReceive(json);
+                        break;
+                    case 6:
+                        ws.groupEmojiReceive(json);
                         break;
                     default:
                         console.log("不正确的类型！");
@@ -180,7 +186,38 @@ var ws = {
             alert("Websocket连接没有开启！");
         }
     },
-
+    singleEmojiSend: function (targetUid, content) {
+        if (!window.WebSocket) {
+            return;
+        }
+        if (socket.readyState === WebSocket.OPEN) {
+            var data = {
+                "type": 5,
+                "sourceUid": userId,
+                "targetUid": targetUid,
+                "content": content
+            };
+            socket.send(JSON.stringify(data));
+        } else {
+            alert("Websocket连接没有开启！");
+        }
+    },
+    groupEmojiSend: function (targetGid, content) {
+        if (!window.WebSocket) {
+            return;
+        }
+        if (socket.readyState === WebSocket.OPEN) {
+            var data = {
+                "type": 6,
+                "sourceUid": userId,
+                "targetGid": targetGid,
+                "content": content
+            };
+            socket.send(JSON.stringify(data));
+        } else {
+            alert("Websocket连接没有开启！");
+        }
+    },
     groupSend: function (targetGid, content) {
         if (!window.WebSocket) {
             return;
@@ -266,6 +303,16 @@ var ws = {
         processFriendList.receiving(content, $receiveLi);
     },
 
+    singleEmojiReceive: function(data) {
+        data.content = getEmojiHtml(data.content);
+        ws.singleReceive(data);
+    },
+
+    groupEmojiReceive: function(data) {
+        data.content = getEmojiHtml(data.content);
+        ws.groupReceive(data);
+    },
+
     groupReceive: function (data) {
         // 获取、构造参数
         console.log(data);
@@ -298,7 +345,7 @@ var ws = {
         processFriendList.receiving(content, $receiveLi);
     },
 
-    fileMsgSingleRecieve: function (data) {
+    fileMsgSingleReceive: function (data) {
         // 获取、构造参数
         console.log(data);
         var fromUserId = data.sourceUid;
@@ -337,7 +384,7 @@ var ws = {
         processFriendList.receiving(content, $receiveLi);
     },
 
-    fileMsgGroupRecieve: function (data) {
+    fileMsgGroupReceive: function (data) {
         // 1. 获取、构造参数
         console.log(data);
         var fromUserId = data.sourceUid;
@@ -465,7 +512,7 @@ $(".myfile").on("fileuploaded", function (event, data, previewId, index) {
         '</li>';
 
     // 3. 发送信息到服务器
-    if (toUserId.length != 0) {
+    if (toUserId.length !== 0) {
         ws.fileMsgSingleSend(toUserId, originalFilename, fileUrl, fileSize);
     } else {
         ws.fileMsgGroupSend(toGroupId, originalFilename, fileUrl, fileSize);
@@ -485,7 +532,7 @@ $('.myfile').on('filepreupload', function (event, data, previewId, index) {
 
 // 绑定发送按钮回车事件
 $('#dope').keydown(function (e) {
-    if (e.keyCode == 13) {
+    if (e.keyCode === 13) {
         $('.sendBtn').trigger('click');
         e.preventDefault(); //屏蔽enter对系统作用。按后增加\r\n等换行
     }
@@ -537,20 +584,19 @@ $('.emjon').on('mouseleave', function () {
 $('.emjon li').on('click', function () {
     var imgSrc = $(this).children('img').attr('src');
     $('.emjon').hide();
-    var fromUserId = userId;
     var toUserId = $('#toUserId').val();
     var toGroupId = $('#toGroupId').val();
-    var content = '<img class="Expr" src="' + imgSrc + '">';
     if (toUserId == '' && toGroupId == '') {
         alert("请选择对话方");
         return;
     }
-    if (toUserId.length != 0) {
-        ws.singleSend(toUserId, content);
+    if (toUserId.length !== 0) {
+        ws.singleEmojiSend(toUserId, imgSrc);
     } else {
-        ws.groupSend(toGroupId, content);
+        ws.groupEmojiSend(toGroupId, imgSrc);
     }
     var avatarUrl = $('#avatarUrl').attr("src");
+    var content = getEmojiHtml(imgSrc);
     var msg = '';
     msg += '<li>' +
         '<div class="news">' + content + '</div>' +
@@ -558,9 +604,13 @@ $('.emjon li').on('click', function () {
         '</li>';
     processMsgBox.sendMsg(msg, toUserId, toGroupId);
     var $sendLi = $('.conLeft').find('li.bg');
-    content = "[图片]";
+    content = "[emoji]";
     processFriendList.sending(content, $sendLi);
-})
+});
+
+function getEmojiHtml(imgSrc) {
+    return '<img class="Expr" src="' + imgSrc + '">';
+}
 
 // 好友框点击事件
 function friendLiClickEvent() {
@@ -775,8 +825,8 @@ var processFriendList = {
         if (content.length > 8) { // 只显示前八个字符
             content = content.substring(0, 8) + "...";
         }
-        if (content.search("<img") != -1) { // 若是图片，显示 “[图片]”
-            content = "[图片]";
+        if (content.search("<img") !== -1) { // 若是图片，显示 “[emoji]”
+            content = "[emoji]";
         }
         $receiveLi.children(".liRight").children('.infor').text(content);
 

@@ -19,7 +19,7 @@
 </head>
 <body class="background">
 <div class="header-w3l">
-    <h3>ROOT聊天室</h3>
+    <h1>ROOT聊天室</h1>
 </div>
 <div class="main-content-agile">
     <div class="sub-main-w3">
@@ -34,7 +34,7 @@
             </div>
 
             <div class="clear"></div>
-            <input type="button" value="登录" onclick="login()"/>
+            <input id="dologin" type="button" value="登录" onclick="login()"/>
             <input type="button" value="注册" onclick="register()"/>
         </form>
     </div>
@@ -57,7 +57,7 @@
             async: false,
             success: function (data) {
                 if (data.code === 200) {
-                    window.location.href = data.data;
+                    window.location.href = "/";
                 } else if (data.code === 500) {
                     window.location.href = "error/500.html"
                 } else {
@@ -70,5 +70,13 @@
     function register() {
         alert("删库跑路了，暂时注册不了，敬请期待！");
     }
+    // 绑定发送按钮回车事件
+    $('#dologin').keydown(function (e) {
+        // console.log(e.keyCode);
+        if (e.keyCode === 13) {
+            $('#dologin').trigger('click');
+            e.preventDefault(); //屏蔽enter对系统作用。按后增加\r\n等换行
+        }
+    });
 </script>
 </html>

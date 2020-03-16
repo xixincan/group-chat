@@ -6,7 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
-import com.xxc.common.util.TicketUtil;
+import com.xxc.common.util.MyTicketUtil;
 import com.xxc.dao.model.*;
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.entity.enums.UserStatusEnum;
@@ -60,11 +60,11 @@ public class UserService implements IUserService {
     @Override
     public UserInfo getSelfUserInfo(HttpServletRequest request) {
         //ticket -> uid
-        String ticket = TicketUtil.getTicket(request);
+        String ticket = MyTicketUtil.getTicket(request);
         if (StrUtil.isEmpty(ticket)) {
             throw new AccessException("请重新登录");
         }
-        String uid = TicketUtil.getUid(ticket);
+        String uid = MyTicketUtil.getUid(ticket);
         String userKey = RedisKey.USER_DIR + uid;
         User cacheUser = this.redisTool.serializeGet(userKey, User.class);
         if (null == cacheUser) {

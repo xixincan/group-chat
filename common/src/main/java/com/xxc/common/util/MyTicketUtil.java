@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
  * 2020-03-10
  * @version 1.0.0
  */
-public class TicketUtil {
+public class MyTicketUtil {
 
     public static String getTicket(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();

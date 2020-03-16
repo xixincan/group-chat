@@ -13,7 +13,7 @@ import java.io.ObjectOutputStream;
  * 2020-03-12
  * @version 1.0.0
  */
-public class SerializeUtil {
+public class MySerializeUtil {
 
     public static byte[] serialize(Object object) {
 

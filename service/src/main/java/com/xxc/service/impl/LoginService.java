@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
-import com.xxc.common.util.TicketUtil;
+import com.xxc.common.util.MyTicketUtil;
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.entity.enums.UserStatusEnum;
 import com.xxc.dao.model.User;
@@ -41,9 +41,9 @@ public class LoginService implements ILoginService {
      */
     @Override
     public boolean checkLogin(HttpServletRequest request) {
-        String ticket = TicketUtil.getTicket(request);
+        String ticket = MyTicketUtil.getTicket(request);
         if (StrUtil.isNotEmpty(ticket)) {
-            String uid = TicketUtil.getUid(ticket);
+            String uid = MyTicketUtil.getUid(ticket);
             return this.redisTool.exist(this.getKey(uid));
         }
         return false;
@@ -58,10 +58,10 @@ public class LoginService implements ILoginService {
     @Override
     public void doLogin(HttpServletRequest request, HttpServletResponse response, UserLoginForm userLoginForm) {
         //重复登录的校验
-        String ticket = TicketUtil.getTicket(request);
+        String ticket = MyTicketUtil.getTicket(request);
         if (StrUtil.isNotEmpty(ticket)) {
             //请求携带了ticket，查看是否已经登录过了
-            String uid = TicketUtil.getUid(ticket);
+            String uid = MyTicketUtil.getUid(ticket);
             User user = this.redisTool.serializeGet(this.getKey(uid), User.class);
             if (null != user) {
                 if (!StrUtil.equals(userLoginForm.getPassword(), user.getPassword())) {
@@ -85,7 +85,7 @@ public class LoginService implements ILoginService {
             this.userService.recordUserLog(user.getUid(), request, UserEventEnum.LOGIN);
         });
         //设置cookie
-        Cookie cookie = new Cookie(RedisKey.TICKET, TicketUtil.genTicket(user.getUid()));
+        Cookie cookie = new Cookie(RedisKey.TICKET, MyTicketUtil.genTicket(user.getUid()));
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
@@ -107,7 +107,7 @@ public class LoginService implements ILoginService {
         for (Cookie cookie : cookies) {
             //删除cookie
             if (RedisKey.TICKET.equals(cookie.getName())) {
-                final String uid = TicketUtil.getUid(cookie.getValue());
+                final String uid = MyTicketUtil.getUid(cookie.getValue());
                 if (StrUtil.isEmpty(uid)) {
                     return;
                 }

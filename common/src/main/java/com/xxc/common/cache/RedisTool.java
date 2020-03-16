@@ -1,7 +1,7 @@
 package com.xxc.common.cache;
 
 import cn.hutool.log.StaticLog;
-import com.xxc.common.util.SerializeUtil;
+import com.xxc.common.util.MySerializeUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -72,7 +72,7 @@ public class RedisTool {
     }
 
     public void serializeSave(String key, Object value) {
-        byte[] bytes = SerializeUtil.serialize(value);
+        byte[] bytes = MySerializeUtil.serialize(value);
         this.redisTemplate.opsForValue().set(key, value);
     }
 
@@ -80,7 +80,7 @@ public class RedisTool {
         if (value == null) {
             return;
         }
-        byte[] bytes = SerializeUtil.serialize(value);
+        byte[] bytes = MySerializeUtil.serialize(value);
         this.redisTemplate.opsForValue().set(key, bytes, timeout, TimeUnit.SECONDS);
     }
 
@@ -89,7 +89,7 @@ public class RedisTool {
         if (null == value) {
             return null;
         }
-        return SerializeUtil.deserialize((byte[]) value, tClass);
+        return MySerializeUtil.deserialize((byte[]) value, tClass);
     }
 
     public boolean exist(String key) {

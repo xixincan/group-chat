@@ -459,7 +459,7 @@ function logout() {
 }
 
 $(".myfile").fileinput({
-    uploadUrl: "chatroom/upload",
+    uploadUrl: "chat/file/upload",
     uploadAsync: true, //默认异步上传
     showUpload: true, //是否显示上传按钮,跟随文本框的那个
     showRemove: false, //显示移除按钮,跟随文本框的那个
@@ -474,7 +474,7 @@ $(".myfile").fileinput({
     previewFileIcon: "<i class='glyphicon glyphicon-file'></i>",
     msgFilesTooMany: "选择上传的文件数量({n}) 超过允许的最大数值{m}！",
     language: 'zh'
-})
+});
 //异步上传返回结果处理
 $('.myfile').on('fileerror', function (event, data, msg) {
     console.log("fileerror");

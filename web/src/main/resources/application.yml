@@ -14,9 +14,16 @@ server:
 
 #logback 配置
 logging:
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger- %msg%n"
+#    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger- %msg%n"
   file: logs/service.log
   level:
-    com.exp.demo: debug
+    com.xxc: DEBUG
+    root: INFO
+    org:
+      springframework:
+        web: DEBUG
 
 #spring配置
 spring:

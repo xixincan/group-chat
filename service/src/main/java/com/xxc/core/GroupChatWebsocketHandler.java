@@ -11,6 +11,7 @@ import com.xxc.entity.exp.AccessException;
 import com.xxc.entity.msg.ChatMessageEntity;
 import com.xxc.service.IChatService;
 import com.xxc.service.IIpPlanService;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -119,7 +120,7 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
                 break;
             case ERROR:
                 StaticLog.error("错误的消息类型，无法处理:{}", text);
-                break;
+                throw new AccessException("无法处理的消息类型");
         }
     }
 
@@ -169,11 +170,21 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        StaticLog.error("catch exp:{}", cause.getMessage());
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        StaticLog.error("catch exp:{}; 准备将错误信息反馈到客户端.", cause.getMessage());
         StaticLog.error(cause);
-        //抓取到异常情况, 关闭客户端的连接，
-        ctx.close();
-        //todo 并清空用户状态
+        //抓取到异常情况, 告知客户端发生了异常
+        Channel channel = ctx.channel();
+        if (null != channel && null != this.chatService.getBindUid(channel)) {
+            ChatMessageEntity expMessage = new ChatMessageEntity();
+            expMessage.setType(ChatTypeEnum.ERROR.getType()).setCode(9999).setMessage(cause.getMessage());
+            try {
+                channel.writeAndFlush(new TextWebSocketFrame(JSONUtil.toJsonStr(expMessage)));
+            } catch (Exception e) {
+                StaticLog.error("still catch exp:{}", cause.getMessage());
+                StaticLog.error(e);
+                ctx.close();
+            }
+        }
     }
 }

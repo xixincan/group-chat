@@ -25,4 +25,6 @@ public interface ConfigKey {
 
     String ALL_IDLE = "all_idle";
 
+    String MSG_DELAY_HOUR = "msg_delay_hour";
+
 }

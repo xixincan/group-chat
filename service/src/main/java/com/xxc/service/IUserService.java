@@ -26,6 +26,11 @@ public interface IUserService {
     UserInfo getSelfUserInfo(HttpServletRequest request);
 
     /**
+     * 检查是否为正常用用户
+     */
+    Boolean checkUser(String uid);
+
+    /**
      * 获取用户简要信息
      */
     UserInfo getUserSimpleInfo(String uid);

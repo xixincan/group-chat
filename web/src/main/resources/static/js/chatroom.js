@@ -132,7 +132,12 @@ function startConnectChatServer() {
                         ws.groupEmojiReceive(json);
                         break;
                     default:
-                        console.log("不正确的类型！");
+                        if (json.code === 9999) {
+                            alert(json.message)
+                        } else {
+                            alert("错误:" + json);
+                        }
+                        break;
                 }
             } else {
                 alert(json.message);

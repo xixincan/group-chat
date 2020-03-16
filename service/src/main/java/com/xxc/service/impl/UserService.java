@@ -106,6 +106,23 @@ public class UserService implements IUserService {
     }
 
     /**
+     * 检查是否为正常用用户
+     *
+     * @param uid
+     */
+    @Override
+    public Boolean checkUser(String uid) {
+        String infoKey = RedisKey.USER_INFO_DIR + uid;
+        UserInfo cacheInfo = this.redisTool.serializeGet(infoKey, UserInfo.class);
+        if (null != cacheInfo) {
+            return true;
+        }
+        Example example = new Example(User.class);
+        example.createCriteria().andEqualTo("uid", uid).andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
+        return this.userMapper.selectCountByExample(example) > 0;
+    }
+
+    /**
      * 获取用户简要信息
      */
     @Override

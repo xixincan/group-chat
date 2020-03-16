@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
 import com.google.common.collect.BiMap;
@@ -12,10 +13,10 @@ import com.xxc.common.cache.RedisTool;
 import com.xxc.common.util.EncryptUtil;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.dao.mapper.MsgLogMapper;
-import com.xxc.dao.mapper.UserMapper;
 import com.xxc.dao.mapper.UserMsgMapper;
 import com.xxc.dao.model.MsgLog;
 import com.xxc.dao.model.UserMsg;
+import com.xxc.entity.exp.AccessException;
 import com.xxc.entity.msg.ChatMessageEntity;
 import com.xxc.entity.response.GroupInfo;
 import com.xxc.entity.response.UserInfo;
@@ -32,7 +33,6 @@ import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -47,9 +47,9 @@ public class ChatService implements IChatService {
     //用户与客户端连接的双向注册表 uid <--> channel
     private static final BiMap<String, Channel> BINDING_TABLE = HashBiMap.create();
 
-    private static final ExecutorService POOL = new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(65536));
+    private static final ExecutorService POOL = new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024));
 
-    private static final ExecutorService TASK = new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(65536));
+    private static final ExecutorService TASK = new ThreadPoolExecutor(16, 32, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024));
 
     @Resource
     private RedisTool redisTool;
@@ -71,26 +71,52 @@ public class ChatService implements IChatService {
         StaticLog.info("接收到来自用户:{}的连接注册消息，绑定到channel:{}", messageEntity.getSourceUid(), channel.id());
         BINDING_TABLE.forcePut(uid, channel);
         //todo 将用户状态修改为在线状态
-        //todo 检测该用户是否有未接收的消息
+
+        //todo 检测该用户是否有{ConfigKey.MSG_DELAY_HOUR}内未接收的消息
+
     }
 
     @Override
     public void handleSingleSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
-        //TODO
+        String targetUid = messageEntity.getTargetUid();
+        if (StrUtil.isEmpty(targetUid)) {
+            StaticLog.error("无效的用户ID:{}", targetUid);
+            throw new AccessException("该用户不存在！");
+        }
+        //获取该用户并将消息写入到对应的channel
+        //在线注册表中找不到对应的用户，首先需要确定用户是否是真实存在，如果是离线用户，则将消息记录到数据表中延迟发送
+        boolean delay = false;
+        if (BINDING_TABLE.containsKey(targetUid)) {
+            //直接写入对应的channel
+            messageEntity.setTimestamp(DateUtil.formatDateTime(DateUtil.date()));
+            this.sendMessage(BINDING_TABLE.get(targetUid), messageEntity);
+
+        } else if (this.userService.checkUser(targetUid)) {
+            //离线状态
+            delay = true;
+            messageEntity.setTimestamp(DateUtil.formatDateTime(DateUtil.date()));
+            StaticLog.warn("用户[{}]不在线, 消息将延迟发送", messageEntity.getTargetUid());
+        } else {
+            //用户不存在或被封
+            StaticLog.error("无效的用户ID:{}", targetUid);
+            throw new AccessException("该用户不存在！");
+        }
+        String channelRemoteIP = MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString());
+        this.recordSingleMsgAsync(messageEntity, channelRemoteIP, delay);
     }
 
     @Override
     public void handlerGroupSendMsg(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
         Integer targetGid = messageEntity.getTargetGid();
         if (null == targetGid || targetGid <= 0) {
-            StaticLog.warn("无效的群ID:{}", targetGid);
-            return;
+            StaticLog.error("无效的群ID:{}", targetGid);
+            throw new AccessException("该群不存在！");
         }
         //获取该群组的所有成员并将消息写入到对应的channel
         GroupInfo groupInfo = this.groupService.getGroupInfo(targetGid);
         if (null == groupInfo) {
             StaticLog.warn("没有找到对应的群:gid={}", targetGid);
-            return;
+            throw new AccessException("该群不存在！");
         }
         StaticLog.info("用户[{}]在群[{}]发送了消息:{}", messageEntity.getSourceUid(), groupInfo.getGroupId(), messageEntity.getContent());
 
@@ -105,7 +131,7 @@ public class ChatService implements IChatService {
             final Channel channel = BINDING_TABLE.get(item);
             if (null != channel) {
                 futureList.add(
-                        CompletableFuture.runAsync(() -> sendMessage(channel, messageEntity), POOL)
+                        CompletableFuture.runAsync(() -> this.sendMessage(channel, messageEntity), POOL)
                 );
                 sentList.add(item);
             } else {
@@ -115,7 +141,7 @@ public class ChatService implements IChatService {
         });
 
         String channelRemoteIP = MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString());
-        this.recordMsgAsync(messageEntity, sentList, unsentList, channelRemoteIP);
+        this.recordGroupMsgAsync(messageEntity, sentList, unsentList, channelRemoteIP);
         CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0])).join();
     }
 
@@ -156,26 +182,25 @@ public class ChatService implements IChatService {
         channel.writeAndFlush(new TextWebSocketFrame(JSONUtil.toJsonStr(message)));
     }
 
-    private void recordMsgAsync(ChatMessageEntity messageEntity,
-                                List<String> sentUidList,
-                                List<String> unsentUidList,
-                                String channelRemoteIP) {
+    private void recordSingleMsgAsync(ChatMessageEntity messageEntity, String channelRemoteIP, boolean delay) {
         CompletableFuture.runAsync(() -> {
             String mid = EncryptUtil.genRandomID();
-            MsgLog record = new MsgLog();
-            record.setMid(mid);
-            record.setType(messageEntity.getType());
-            record.setSourceUid(messageEntity.getSourceUid());
-            record.setTargetUid(messageEntity.getTargetUid());
-            record.setGid(messageEntity.getTargetGid());
-            record.setContent(messageEntity.getContent());
-            record.setFileName(messageEntity.getFileName());
-            record.setFileSize(messageEntity.getFileSize());
-            record.setFileURL(messageEntity.getFileURL());
-            record.setTime(DateUtil.parse(messageEntity.getTimestamp(), DatePattern.NORM_DATETIME_PATTERN).getTime());
-            record.setIpAddr(channelRemoteIP);
+            this.recordMessage(messageEntity, channelRemoteIP, mid);
+            UserMsg userMsg = new UserMsg();
+            userMsg.setMid(mid);
+            userMsg.setUid(messageEntity.getTargetUid());
+            userMsg.setSent(!delay);
+            this.userMsgMapper.insertSelective(userMsg);
+        }, TASK);
+    }
 
-            this.msgLogMapper.insertSelective(record);
+    private void recordGroupMsgAsync(ChatMessageEntity messageEntity,
+                                     List<String> sentUidList,
+                                     List<String> unsentUidList,
+                                     String channelRemoteIP) {
+        CompletableFuture.runAsync(() -> {
+            String mid = EncryptUtil.genRandomID();
+            this.recordMessage(messageEntity, channelRemoteIP, mid);
             UserMsg userMsg = new UserMsg();
             userMsg.setMid(mid);
             if (CollectionUtil.isNotEmpty(sentUidList)) {
@@ -198,6 +223,22 @@ public class ChatService implements IChatService {
                 });
             }
         }, TASK);
+    }
+
+    private void recordMessage(ChatMessageEntity messageEntity, String channelRemoteIP, String mid) {
+        MsgLog record = new MsgLog();
+        record.setMid(mid);
+        record.setType(messageEntity.getType());
+        record.setSourceUid(messageEntity.getSourceUid());
+        record.setTargetUid(messageEntity.getTargetUid());
+        record.setGid(messageEntity.getTargetGid());
+        record.setContent(messageEntity.getContent());
+        record.setFileName(messageEntity.getFileName());
+        record.setFileSize(messageEntity.getFileSize());
+        record.setFileURL(messageEntity.getFileURL());
+        record.setTime(DateUtil.parse(messageEntity.getTimestamp(), DatePattern.NORM_DATETIME_PATTERN).getTime());
+        record.setIpAddr(channelRemoteIP);
+        this.msgLogMapper.insertSelective(record);
     }
 
 }

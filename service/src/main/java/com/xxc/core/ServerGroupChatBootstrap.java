@@ -1,10 +1,9 @@
-package com.xxc.web.listener;
+package com.xxc.core;
 
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.ConfigKey;
 import com.xxc.common.consts.RedisKey;
-import com.xxc.core.GroupChatClientInitHandler;
 import com.xxc.service.IConfigService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -14,27 +13,18 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 群聊启动器
- * <p>
- * Created by xixincan
- * 2020-03-08
- *
+ * @author xixincan
+ * 2020-03-17
  * @version 1.0.0
  */
-@Component
-public class GroupChatServerBootstrap implements ApplicationListener<ContextRefreshedEvent> {
-
-    private final AtomicBoolean running = new AtomicBoolean(false);
+@Service
+public class ServerGroupChatBootstrap {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
@@ -47,23 +37,7 @@ public class GroupChatServerBootstrap implements ApplicationListener<ContextRefr
     @Resource
     private GroupChatClientInitHandler groupChatClientInitHandler;
 
-    /**
-     * Handle an application event.
-     *
-     * @param event the event to respond to
-     */
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (this.running.compareAndSet(false, true)) {
-            //使用单独的线程去启动
-            CompletableFuture.runAsync(() -> {
-                StaticLog.info("====>>>>开始启动群聊服务<<<<======");
-                this.startServer();
-            });
-        }
-    }
-
-    private void startServer() {
+    public void startServer() {
         this.bossGroup = new NioEventLoopGroup(1);
         //CPU core * 2
         this.workerGroup = new NioEventLoopGroup();
@@ -125,4 +99,5 @@ public class GroupChatServerBootstrap implements ApplicationListener<ContextRefr
             StaticLog.error(ie);
         }
     }
+
 }

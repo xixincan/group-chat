@@ -69,6 +69,14 @@ public class EncryptUtil {
         }
     }
 
+    public static String encrypt(String text) {
+        return Des.encrypt(text);
+    }
+
+    public static String decrypt(String cipher) {
+        return Des.decrypt(cipher);
+    }
+
     /**
      * URL 编码, Encode默认为UTF-8.
      */

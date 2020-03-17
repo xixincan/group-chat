@@ -24,7 +24,7 @@ import javax.annotation.Resource;
  * @version 1.0.0
  */
 @Service
-public class ServerGroupChatBootstrap {
+public class GroupChatBootstrap {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;

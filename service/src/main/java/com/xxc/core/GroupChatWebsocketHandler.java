@@ -8,7 +8,7 @@ import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.enums.ChatTypeEnum;
 import com.xxc.entity.exp.AccessException;
-import com.xxc.entity.msg.ChatMessageEntity;
+import com.xxc.entity.model.ChatMessageEntity;
 import com.xxc.service.IChatService;
 import com.xxc.service.IIpPlanService;
 import io.netty.channel.Channel;
@@ -61,6 +61,8 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
     private RedisTool redisTool;
     @Resource
     private IChatService chatService;
+    @Resource
+    private GlobalGroupChatContext groupChatContext;
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
@@ -165,7 +167,7 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
                     break;
             }
             StaticLog.info("{}-{}超时事件--{}",
-                    ctx.channel().remoteAddress(), this.chatService.getBindUid(ctx.channel()), eventType);
+                    ctx.channel().remoteAddress(), this.groupChatContext.getLocalBindUid(ctx.channel()), eventType);
         }
     }
 
@@ -175,7 +177,7 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
         StaticLog.error(cause);
         //抓取到异常情况, 告知客户端发生了异常
         Channel channel = ctx.channel();
-        if (null != channel && null != this.chatService.getBindUid(channel)) {
+        if (null != channel && null != this.groupChatContext.getLocalBindUid(channel)) {
             ChatMessageEntity expMessage = new ChatMessageEntity();
             expMessage.setType(ChatTypeEnum.ERROR.getType()).setCode(9999).setMessage(cause.getMessage());
             try {

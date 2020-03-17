@@ -7,17 +7,16 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.log.StaticLog;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.util.EncryptUtil;
 import com.xxc.common.util.MyIPUtil;
+import com.xxc.core.GlobalGroupChatContext;
 import com.xxc.dao.mapper.MsgLogMapper;
 import com.xxc.dao.mapper.UserMsgMapper;
 import com.xxc.dao.model.MsgLog;
 import com.xxc.dao.model.UserMsg;
 import com.xxc.entity.exp.AccessException;
-import com.xxc.entity.msg.ChatMessageEntity;
+import com.xxc.entity.model.ChatMessageEntity;
 import com.xxc.entity.response.GroupInfo;
 import com.xxc.entity.response.UserInfo;
 import com.xxc.service.IChatService;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -44,13 +42,14 @@ import java.util.stream.Collectors;
 @Service
 public class ChatService implements IChatService {
 
-    //用户与客户端连接的双向注册表 uid <--> channel
-    private static final BiMap<String, Channel> BINDING_TABLE = HashBiMap.create();
+    private static final ExecutorService CHAT =
+            new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024));
 
-    private static final ExecutorService POOL = new ThreadPoolExecutor(16, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024));
+    private static final ExecutorService TASK =
+            new ThreadPoolExecutor(16, 32, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024));
 
-    private static final ExecutorService TASK = new ThreadPoolExecutor(16, 32, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1024));
-
+    @Resource
+    private GlobalGroupChatContext groupChatContext;
     @Resource
     private RedisTool redisTool;
     @Resource
@@ -69,7 +68,7 @@ public class ChatService implements IChatService {
         String uid = messageEntity.getSourceUid();
         Channel channel = ctx.channel();
         StaticLog.info("接收到来自用户:{}的连接注册消息，绑定到channel:{}", messageEntity.getSourceUid(), channel.id());
-        BINDING_TABLE.forcePut(uid, channel);
+        this.groupChatContext.bind(uid, channel);
         //todo 将用户状态修改为在线状态
 
         //todo 检测该用户是否有{ConfigKey.MSG_DELAY_HOUR}内未接收的消息
@@ -86,10 +85,13 @@ public class ChatService implements IChatService {
         //获取该用户并将消息写入到对应的channel
         //在线注册表中找不到对应的用户，首先需要确定用户是否是真实存在，如果是离线用户，则将消息记录到数据表中延迟发送
         boolean delay = false;
-        if (BINDING_TABLE.containsKey(targetUid)) {
+        if (this.groupChatContext.isOnLocalBinding(targetUid)) {
             //直接写入对应的channel
             messageEntity.setTimestamp(DateUtil.formatDateTime(DateUtil.date()));
-            this.sendMessage(BINDING_TABLE.get(targetUid), messageEntity);
+            this.sendMessage(this.groupChatContext.getLocalChannel(targetUid), messageEntity);
+        } else if (this.groupChatContext.isOnBinding(targetUid)) {
+            //todo 集群通知
+
 
         } else if (this.userService.checkUser(targetUid)) {
             //离线状态
@@ -100,6 +102,7 @@ public class ChatService implements IChatService {
             //用户不存在或被封
             StaticLog.error("无效的用户ID:{}", targetUid);
             throw new AccessException("该用户不存在！");
+
         }
         String channelRemoteIP = MyIPUtil.getChannelRemoteIP(ctx.channel().remoteAddress().toString());
         this.recordSingleMsgAsync(messageEntity, channelRemoteIP, delay);
@@ -128,15 +131,22 @@ public class ChatService implements IChatService {
         final List<String> sentList = new ArrayList<>();
         final List<String> unsentList = new ArrayList<>();
         uidList.forEach(item -> {
-            final Channel channel = BINDING_TABLE.get(item);
-            if (null != channel) {
+            if (this.groupChatContext.isOnLocalBinding(item)) {
+                final Channel channel = this.groupChatContext.getLocalChannel(item);
                 futureList.add(
-                        CompletableFuture.runAsync(() -> this.sendMessage(channel, messageEntity), POOL)
+                        CompletableFuture.runAsync(() -> this.sendMessage(channel, messageEntity), CHAT)
                 );
                 sentList.add(item);
-            } else {
+            } else if (this.groupChatContext.isOnBinding(item)) {
+                //todo 集群通知
+
+
+            } else if (this.userService.checkUser(item)) {
                 //记录消息未发送的成员；待上线后发送
                 unsentList.add(item);
+            } else {
+                //用户不存在或被封
+                StaticLog.error("无效的用户ID:{}", item);
             }
         });
 
@@ -157,25 +167,8 @@ public class ChatService implements IChatService {
 
     @Override
     public void handleExit(ChannelHandlerContext ctx) {
-        String remove = BINDING_TABLE.inverse().remove(ctx.channel());
+        String remove = this.groupChatContext.unbind(ctx.channel());
         StaticLog.info("用户[{}]下线了", remove);
-    }
-
-    @Override
-    public Channel getTargetChannel(String targetUid) {
-        return BINDING_TABLE.get(targetUid);
-    }
-
-    @Override
-    public List<Channel> getTargetChannelGroup(Collection<String> uidCollection) {
-        return uidCollection.parallelStream()
-                .map(BINDING_TABLE::get)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public String getBindUid(Channel channel) {
-        return BINDING_TABLE.inverse().get(channel);
     }
 
     private void sendMessage(Channel channel, ChatMessageEntity message) {

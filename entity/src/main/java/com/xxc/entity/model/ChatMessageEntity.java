@@ -1,4 +1,4 @@
-package com.xxc.entity.msg;
+package com.xxc.entity.model;
 
 import java.io.Serializable;
 

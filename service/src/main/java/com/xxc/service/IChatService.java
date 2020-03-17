@@ -1,6 +1,6 @@
 package com.xxc.service;
 
-import com.xxc.entity.msg.ChatMessageEntity;
+import com.xxc.entity.model.ChatMessageEntity;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -27,11 +27,5 @@ public interface IChatService {
     void handleGroupSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity);
 
     void handleExit(ChannelHandlerContext ctx);
-
-    Channel getTargetChannel(String targetUid);
-
-    List<Channel> getTargetChannelGroup(Collection<String> uidCollection);
-
-    String getBindUid(Channel channel);
 
 }

@@ -1,7 +1,7 @@
 package com.xxc.web.listener;
 
 import cn.hutool.log.StaticLog;
-import com.xxc.core.ServerGroupChatBootstrap;
+import com.xxc.core.GroupChatBootstrap;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class GroupChatServerListener implements ApplicationListener<ContextRefre
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     @Resource
-    private ServerGroupChatBootstrap serverGroupChatBootstrap;
+    private GroupChatBootstrap groupChatBootstrap;
 
     /**
      * Handle an application event.
@@ -38,7 +38,7 @@ public class GroupChatServerListener implements ApplicationListener<ContextRefre
             //使用单独的线程去启动
             CompletableFuture.runAsync(() -> {
                 StaticLog.info("====>>>>开始启动群聊服务<<<<======");
-                this.serverGroupChatBootstrap.startServer();
+                this.groupChatBootstrap.startServer();
             });
         }
     }

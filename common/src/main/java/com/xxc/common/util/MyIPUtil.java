@@ -19,6 +19,8 @@ public class MyIPUtil {
     private MyIPUtil() {
     }
 
+    private static String IP = getIpAddress();
+
     /**
      * 如果使用了反向代理软件, 经过代理以后，由于在客户端和服务之间增加了中间层，request.getRemoteAddr（）的方法获取的IP实际上是代理服务器的地址,
      * 因此服务器无法直接拿到客户端的IP;
@@ -66,7 +68,7 @@ public class MyIPUtil {
     /**
      * 获取本机IP地址，非虚拟网卡的IP地址，Windows和Linux通用
      */
-    public static String getIpAddress() {
+    private static String getIpAddress() {
         try {
             Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
             InetAddress ip;
@@ -89,5 +91,9 @@ public class MyIPUtil {
             StaticLog.error(e);
         }
         return "";
+    }
+
+    public static String getIP() {
+        return IP;
     }
 }

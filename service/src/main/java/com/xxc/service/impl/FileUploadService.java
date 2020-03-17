@@ -4,6 +4,7 @@ import cn.hutool.log.StaticLog;
 import com.xxc.common.consts.ConfigKey;
 import com.xxc.common.util.EncryptUtil;
 import com.xxc.common.util.MyFileUtil;
+import com.xxc.common.util.MyIPUtil;
 import com.xxc.entity.exp.AccessException;
 import com.xxc.entity.response.FileInfo;
 import com.xxc.service.IConfigService;
@@ -46,7 +47,8 @@ public class FileUploadService implements IFileUploadService {
         }
         filename = filename + suffix;
         String path = this.configService.getValue(ConfigKey.FILE_STORE_DIR);
-        String prefix = request.getSession().getServletContext().getRealPath("/") + path;
+        String prefix = request.getSession().getServletContext().getRealPath(path);
+
         StaticLog.info("存储路径为:{}/{}", prefix, filename);
         Path filePath = Paths.get(prefix, filename);
         try {
@@ -55,7 +57,9 @@ public class FileUploadService implements IFileUploadService {
             throw new AccessException("文件上传发生错误:" + e.getMessage());
         }
         //TODO file url
-        String fileUrl = "";
+        String address = MyIPUtil.getIP() + this.port;
+        //todo 再参考修改 https://blog.csdn.net/qq_32662595/article/details/90519752
+        String fileUrl = "http://" + address + "/ROOT/" + filename;
         return new FileInfo().setOriginalFilename(originalFilename).setFileSize(fileSize).setFileUrl(fileUrl);
     }
 

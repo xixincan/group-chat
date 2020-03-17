@@ -4,6 +4,10 @@ import cn.hutool.log.StaticLog;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 /**
  * @version 1.0.0
@@ -53,5 +57,37 @@ public class MyIPUtil {
     public static String getChannelRemoteIP(String remoteAddr) {
         StaticLog.info(remoteAddr);
         return remoteAddr.substring(1, remoteAddr.indexOf(":"));
+    }
+
+    public static void main(String[] args) {
+        System.out.println("本机IP:" + getIpAddress());
+    }
+
+    /**
+     * 获取本机IP地址，非虚拟网卡的IP地址，Windows和Linux通用
+     */
+    public static String getIpAddress() {
+        try {
+            Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+            InetAddress ip;
+            while (allNetInterfaces.hasMoreElements()) {
+                NetworkInterface netInterface = allNetInterfaces.nextElement();
+                if (netInterface.isLoopback() || netInterface.isVirtual() || !netInterface.isUp()) {
+                    continue;
+                } else {
+                    Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
+                    while (addresses.hasMoreElements()) {
+                        ip = addresses.nextElement();
+                        if (ip instanceof Inet4Address) {
+                            return ip.getHostAddress();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            StaticLog.error("获取本机IP地址失败:{}", e);
+            StaticLog.error(e);
+        }
+        return "";
     }
 }

@@ -1,14 +1,12 @@
 package com.xxc.web.controller;
 
 import com.xxc.common.consts.ConfigKey;
+import com.xxc.entity.annotation.SkipLoginCheck;
 import com.xxc.entity.response.FileInfo;
 import com.xxc.entity.result.MyResult;
 import com.xxc.service.IConfigService;
 import com.xxc.service.IFileUploadService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -37,6 +35,7 @@ public class ChatController {
         );
     }
 
+    @SkipLoginCheck
     @PostMapping("file/upload")
     public MyResult<FileInfo> upload(@RequestParam(value = "file") MultipartFile file, HttpServletRequest request) {
         return MyResult.success(this.fileUploadService.upload(file, request));

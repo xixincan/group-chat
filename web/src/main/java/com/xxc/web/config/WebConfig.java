@@ -1,17 +1,13 @@
 package com.xxc.web.config;
 
+import com.xxc.service.IFileUploadService;
 import com.xxc.web.interceptor.AccessLimitInterceptor;
 import com.xxc.web.interceptor.LoginInterceptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.MappedInterceptor;
+import org.springframework.web.servlet.config.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * 默认首页
@@ -23,26 +19,25 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${chat.file.path.mapping}")
+    private String fileMappingPath;
+
+    @Value("${chat.file.upload.macos}")
+    private String macOSFilePath;
+
+    @Value("${chat.file.upload.windows}")
+    private String windowsFilePath;
+
+    @Value("${chat.file.upload.linux}")
+    private String linuxFilePath;
+
     @Resource
     private AccessLimitInterceptor accessLimitInterceptor;
-
     @Resource
     private LoginInterceptor loginInterceptor;
+    @Resource
+    private IFileUploadService fileUploadService;
 
-    /**
-     * Add Spring MVC lifecycle interceptors for pre- and post-processing of
-     * controller method invocations. Interceptors can be registered to apply
-     * to all requests or be limited to a subset of URL patterns.
-     * <p><strong>Note</strong> that interceptors registered here only apply to
-     * controllers and not to resource handler requests. To intercept requests for
-     * static resources either declare a
-     * {@link MappedInterceptor MappedInterceptor}
-     * bean or switch to advanced configuration mode by extending
-     * {@link WebMvcConfigurationSupport
-     * WebMvcConfigurationSupport} and then override {@code resourceHandlerMapping}.
-     *
-     * @param registry
-     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(this.accessLimitInterceptor)
@@ -50,5 +45,40 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(this.loginInterceptor)
                 .excludePathPatterns("/error", "/static/**", "/favico.ico")
                 .addPathPatterns("/**");
+    }
+
+    /**
+     * Configure cross origin requests processing.
+     */
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**").allowedOrigins("*").allowCredentials(true).allowedMethods("*").maxAge(1800);
+    }
+
+    /**
+     * Add handlers to serve static resources such as images, js, and, css
+     * files from specific locations under web application root, the classpath,
+     * and others.
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //判断当前的系统
+        String pathPattern = this.fileMappingPath + "**";
+        ResourceHandlerRegistration resourceHandlerRegistration = registry.addResourceHandler(pathPattern);
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.startsWith("win")) {
+            //Windows
+            // fileMappingPath 表示在磁盘windowsFilePath目录下的所有资源会被解析为以下的路径
+            resourceHandlerRegistration.addResourceLocations("file:" + this.windowsFilePath);
+            this.fileUploadService.initUploadFileDir(this.windowsFilePath);
+        } else if (os.startsWith("mac")) {
+            //macOS
+            resourceHandlerRegistration.addResourceLocations("file:" + this.macOSFilePath);
+            this.fileUploadService.initUploadFileDir(this.macOSFilePath);
+        } else {
+            //Linux
+            resourceHandlerRegistration.addResourceLocations("file:" + this.linuxFilePath);
+            this.fileUploadService.initUploadFileDir(this.linuxFilePath);
+        }
     }
 }

@@ -12,5 +12,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface IFileUploadService {
 
+    void initUploadFileDir(String uploadFileDir);
+
     FileInfo upload(MultipartFile file, HttpServletRequest request);
 }

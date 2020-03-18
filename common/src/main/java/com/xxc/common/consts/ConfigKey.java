@@ -27,6 +27,4 @@ public interface ConfigKey {
 
     String MSG_DELAY_HOUR = "msg_delay_hour";
 
-    String FILE_STORE_DIR = "file_store_dir";
-
 }

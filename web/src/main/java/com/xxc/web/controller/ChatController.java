@@ -1,7 +1,6 @@
 package com.xxc.web.controller;
 
 import com.xxc.common.consts.ConfigKey;
-import com.xxc.entity.annotation.SkipLoginCheck;
 import com.xxc.entity.response.FileInfo;
 import com.xxc.entity.result.MyResult;
 import com.xxc.service.IConfigService;
@@ -35,7 +34,6 @@ public class ChatController {
         );
     }
 
-    @SkipLoginCheck
     @PostMapping("file/upload")
     public MyResult<FileInfo> upload(@RequestParam(value = "file") MultipartFile file, HttpServletRequest request) {
         return MyResult.success(this.fileUploadService.upload(file, request));

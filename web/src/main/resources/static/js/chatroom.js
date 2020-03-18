@@ -11,10 +11,12 @@ function initChatURI() {
         type: "POST",
         url: "chat/groupchat/path",
         dataType: "json",
-        async: false,
+        async: true,
         success: function (data) {
             if (data.code === 200) {
                 chaturi = data.data;
+                initUserInfo();
+                startConnectChatServer();
             } else {
                 console.log(data);
                 alert(data.message);

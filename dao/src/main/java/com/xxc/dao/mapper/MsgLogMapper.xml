@@ -12,7 +12,7 @@
     <result column="targetUid" jdbcType="VARCHAR" property="targetUid" />
     <result column="gid" jdbcType="INTEGER" property="gid" />
     <result column="fileName" jdbcType="VARCHAR" property="fileName" />
-    <result column="fileSize" jdbcType="BIGINT" property="fileSize" />
+    <result column="fileSize" jdbcType="VARCHAR" property="fileSize" />
     <result column="fileURL" jdbcType="VARCHAR" property="fileURL" />
     <result column="ipAddr" jdbcType="VARCHAR" property="ipAddr" />
     <result column="time" jdbcType="BIGINT" property="time" />

@@ -70,6 +70,8 @@ function initUserInfo() {
                 $('.conLeft ul').append(friendListHTML);
                 // 绑定好友框点击事件
                 $('.conLeft ul li').on('click', friendLiClickEvent);
+                // 绑定输入框以及右侧面板点击事件
+                $('.conRight').on('click', messageDivClickEvent);
             } else {
                 alert(data.message);
             }
@@ -87,8 +89,8 @@ function initSentMessageMap(data) {
     }
     var friendList = data.friendList;
     if (friendList && friendList.length > 0) {
-        for (var i = 0; i < friendList.length; i++) {
-            sentMessageMap.put(friendList[i].uid, []);
+        for (var j = 0; j < friendList.length; j++) {
+            sentMessageMap.put(friendList[j].uid, []);
         }
     }
     console.log(sentMessageMap);
@@ -548,11 +550,11 @@ $('.sendBtn').on('click', function () {
     var toUserId = $('#toUserId').val();
     var toGroupId = $('#toGroupId').val();
     var news = $('#dope').val();
-    if (toUserId == '' && toGroupId == '') {
+    if (!toUserId && !toGroupId) {
         alert("请选择对话方");
         return;
     }
-    if (news == '') {
+    if (!news) {
         alert('消息不能为空');
     } else {
         if (toUserId.length !== 0) {
@@ -591,7 +593,7 @@ $('.emjon li').on('click', function () {
     $('.emjon').hide();
     var toUserId = $('#toUserId').val();
     var toGroupId = $('#toGroupId').val();
-    if (toUserId == '' && toGroupId == '') {
+    if (!toUserId  && !toGroupId) {
         alert("请选择对话方");
         return;
     }
@@ -619,7 +621,6 @@ function getEmojiHtml(imgSrc) {
 
 // 好友框点击事件
 function friendLiClickEvent() {
-
     // 1. 设置点击阴影效果
     $(this).addClass('bg').siblings().removeClass('bg');
 
@@ -630,9 +631,9 @@ function friendLiClickEvent() {
     var intername = $(this).children('.liRight').children('.intername').text();
     var toUserId = $(this).children('.liRight').children('.hidden-userId').text();
     var toGroupId = $(this).children('.liRight').children('.hidden-groupId').text();
-    /*alert('userId:' + (toUserId.length != 0));
-    alert('groupId:' + toGroupId);*/
-    $('.headName').text(intername);
+
+    $('.headName #headName').text(intername);
+    $('#hideID').text(toUserId ? toUserId : toGroupId);
     $('#toUserId').val("");
     $('#toGroupId').val("");
 
@@ -660,6 +661,18 @@ function friendLiClickEvent() {
     }
 }
 
+//右侧消息面板以及输入框的点击事件
+function messageDivClickEvent() {
+    let hideID = $('#hideID').text();
+    $('.conLeft ul li').find('span.hidden-groupId,span.hidden-userId').each(function() {
+        if (this.innerHTML === hideID) {
+            $(this).parent().parent().trigger("click");
+            //jquery return false=break, return true=continue;
+            return false;
+        }
+    });
+}
+
 // 处理消息框的对象，统一管理相关处理函数，主要包括4个事件函数：
 // (实际上应该有8个事件函数，发送得4个：单发普通信息、群发普通信息、单发文件信息、群发文件信息，
 // 再加上对应的接收4个，但根据实际情况，发现代码可重用，于是便缩减为4个)
@@ -680,7 +693,6 @@ var processMsgBox = {
         var marginLeftWidth; // 要计算消息框的margin-left宽度
         if ($newsDiv.actual('width') < fixWidth) {
             marginLeftWidth = maxWidth - $newsDiv.actual('width');
-            ;
             $newsDiv.css("margin-left", marginLeftWidth + "px");
         } else {
             $newsDiv.css("width", fixWidth + "px")

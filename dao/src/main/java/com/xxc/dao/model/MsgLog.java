@@ -55,7 +55,7 @@ public class MsgLog extends DynamicTableNameBean implements Serializable {
      * 文件大小
      */
     @Column(name = "fileSize")
-    private Long fileSize;
+    private String fileSize;
 
     /**
      * 文件地址
@@ -213,7 +213,7 @@ public class MsgLog extends DynamicTableNameBean implements Serializable {
      *
      * @return fileSize - 文件大小
      */
-    public Long getFileSize() {
+    public String getFileSize() {
         return fileSize;
     }
 
@@ -222,7 +222,7 @@ public class MsgLog extends DynamicTableNameBean implements Serializable {
      *
      * @param fileSize 文件大小
      */
-    public void setFileSize(Long fileSize) {
+    public void setFileSize(String fileSize) {
         this.fileSize = fileSize;
     }
 

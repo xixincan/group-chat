@@ -22,7 +22,7 @@ public class ChatMessageEntity implements Serializable {
     //消息接收群标识（群聊）
     private Integer targetGid;
     //文件大小（传文件）
-    private Long fileSize;
+    private String fileSize;
     //文件名称（传文件）
     private String fileName;
     //文件地址（传文件）
@@ -79,11 +79,11 @@ public class ChatMessageEntity implements Serializable {
         return this;
     }
 
-    public Long getFileSize() {
+    public String getFileSize() {
         return fileSize;
     }
 
-    public ChatMessageEntity setFileSize(Long fileSize) {
+    public ChatMessageEntity setFileSize(String fileSize) {
         this.fileSize = fileSize;
         return this;
     }

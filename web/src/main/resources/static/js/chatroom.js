@@ -292,7 +292,7 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML == fromUserId) {
+            if (this.innerHTML === fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 $receiveLi = $(this).parent(".liRight").parent("li");
@@ -329,14 +329,14 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML == fromUserId) {
+            if (this.innerHTML === fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 /* $receiveLi = $(this).parent(".liRight").parent("li"); */
             }
         });
         $('.conLeft').find('span.hidden-groupId').each(function () {
-            if (this.innerHTML == toGroupId) {
+            if (this.innerHTML === toGroupId) {
                 $receiveLi = $(this).parent(".liRight").parent("li");
             }
         });
@@ -363,7 +363,7 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML == fromUserId) {
+            if (this.innerHTML === fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 $receiveLi = $(this).parent(".liRight").parent("li");
@@ -403,14 +403,14 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML == fromUserId) {
+            if (this.innerHTML === fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 /* $receiveLi = $(this).parent(".liRight").parent("li"); */
             }
         })
         $('.conLeft').find('span.hidden-groupId').each(function () {
-            if (this.innerHTML == toGroupId) {
+            if (this.innerHTML === toGroupId) {
                 $receiveLi = $(this).parent(".liRight").parent("li");
             }
         })
@@ -640,7 +640,7 @@ function friendLiClickEvent() {
     // 4. 设置显示已收到的信息，设置好对方的id
     $('.newsList').html('');
     var messageArray;
-    if (toUserId.length != 0) {
+    if (toUserId.length !== 0) {
         messageArray = sentMessageMap.get(toUserId);
         $('#toUserId').val(toUserId);
     } else {
@@ -700,7 +700,7 @@ var processMsgBox = {
         }
 
         // 3. 把 调整后的消息html标签字符串 添加到已发送用户消息表
-        if (toUserId.length != 0) {
+        if (toUserId.length !== 0) {
             sentMessageMap.get(toUserId).push($('.newsList li').last().prop("outerHTML"));
         } else {
             sentMessageMap.get(toGroupId).push($('.newsList li').last().prop("outerHTML"));
@@ -733,7 +733,7 @@ var processMsgBox = {
         // 2. 把新消息放到暂存区$('.newsList-temp)，如果用户正处于与发出新消息的用户的消息框，则消息要回显
         $('.newsList-temp').append(msg);
         var $focusUserId = $(".conLeft .bg").find('span.hidden-userId');
-        if ($focusUserId.length > 0 && $focusUserId.html() == fromUserId) {
+        if ($focusUserId.length > 0 && $focusUserId.html() === fromUserId) {
             $('.newsList').append(msg);
         }
 
@@ -746,14 +746,14 @@ var processMsgBox = {
         if ($answersDiv.actual('width') < fixWidth) {
             marginRightWidth = maxWidth - $answersDiv.actual('width');
             $answersDiv.css("margin-right", marginRightWidth + "px");
-            if ($focusUserId.length > 0 && $focusUserId.html() == fromUserId) {
+            if ($focusUserId.length > 0 && $focusUserId.html() === fromUserId) {
                 $('.newsList li').last().children("div").first()
                     .css("margin-right", marginRightWidth + "px");
             }
         } else {
             $answersDiv.css("width", fixWidth + "px")
                 .css("margin-right", minMarginRightWidth + "px");
-            if ($focusUserId.length > 0 && $focusUserId.html() == fromUserId) {
+            if ($focusUserId.length > 0 && $focusUserId.html() === fromUserId) {
                 $('.newsList li').last().children("div").first()
                     .css("width", fixWidth + "px")
                     .css("margin-right", minMarginRightWidth + "px");
@@ -775,7 +775,7 @@ var processMsgBox = {
         // 2. 把新消息放到暂存区$('.newsList-temp)，如果用户正处于与发出新消息的用户的消息框，则消息要回显
         $('.newsList-temp').append(msg);
         var $focusGroupId = $(".conLeft .bg").find('span.hidden-groupId');
-        if ($focusGroupId.length > 0 && $focusGroupId.html() == toGroupId) {
+        if ($focusGroupId.length > 0 && $focusGroupId.html() === toGroupId) {
             $('.newsList').append(msg);
         }
 
@@ -788,14 +788,14 @@ var processMsgBox = {
         if ($answersDiv.actual('width') < fixWidth) {
             marginRightWidth = maxWidth - $answersDiv.actual('width');
             $answersDiv.css("margin-right", marginRightWidth + "px");
-            if ($focusGroupId.length > 0 && $focusGroupId.html() == toGroupId) {
+            if ($focusGroupId.length > 0 && $focusGroupId.html() === toGroupId) {
                 $('.newsList li').last().children("div").first()
                     .css("margin-right", marginRightWidth + "px");
             }
         } else {
             $answersDiv.css("width", fixWidth + "px")
                 .css("margin-right", minMarginRightWidth + "px");
-            if ($focusGroupId.length > 0 && $focusGroupId.html() == toGroupId) {
+            if ($focusGroupId.length > 0 && $focusGroupId.html() === toGroupId) {
                 $('.newsList li').last().children("div").first()
                     .css("width", fixWidth + "px")
                     .css("margin-right", minMarginRightWidth + "px");

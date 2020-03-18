@@ -18,11 +18,11 @@
     <link rel="stylesheet" href="/css/common/font-awesome.css"/> <!-- Font-Awesome-Icons-CSS -->
     <link rel="stylesheet" href="/css/login.css" type="text/css" media="all"/> <!-- Style-CSS -->
 </head>
-<body class="background">
+<body>
 <div class="header-w3l">
     <h1>ROOT聊天室</h1>
 </div>
-<div class="main-content-agile">
+<div class="main-content-agile" style="background-color: #F2F2F2">
     <div class="sub-main-w3">
         <h2>登录</h2>
         <form>
@@ -44,6 +44,7 @@
     <p>&copy; 2020 ROOT Back-end Vincent, All Rights Reserved </p>
 </div>
 </body>
+<script type="text/javascript" src="js/backgroud.js"></script>
 <script type="text/javascript">
     function login() {
         $.ajax({
@@ -79,5 +80,7 @@
             e.preventDefault(); //屏蔽enter对系统作用。按后增加\r\n等换行
         }
     });
+    initPoints(99);
+    drawFrame();
 </script>
 </html>

@@ -307,9 +307,9 @@ var ws = {
             '</li>';
 
         // 消息框处理
-        processMsgBox.receiveSingleMsg(answer, fromUserId);
+        processMsgBox.afterReceiveSingleMsg(answer, fromUserId);
         // 好友列表处理
-        processFriendList.receiving(content, $receiveLi);
+        processFriendList.onReceiving(content, $receiveLi);
     },
 
     singleEmojiReceive: function(data) {
@@ -349,9 +349,9 @@ var ws = {
             '</li>';
 
         // 消息框处理
-        processMsgBox.receiveGroupMsg(answer, toGroupId);
+        processMsgBox.afterReceiveGroupMsg(answer, toGroupId);
         // 好友列表处理
-        processFriendList.receiving(content, $receiveLi);
+        processFriendList.onReceiving(content, $receiveLi);
     },
 
     fileMsgSingleReceive: function (data) {
@@ -388,9 +388,9 @@ var ws = {
             '</li>';
 
         // 消息框处理
-        processMsgBox.receiveSingleMsg(fileHtml, fromUserId);
+        processMsgBox.afterReceiveSingleMsg(fileHtml, fromUserId);
         // 好友列表处理
-        processFriendList.receiving(content, $receiveLi);
+        processFriendList.onReceiving(content, $receiveLi);
     },
 
     fileMsgGroupReceive: function (data) {
@@ -433,9 +433,9 @@ var ws = {
             '</li>';
 
         // 2. 消息框处理
-        processMsgBox.receiveGroupMsg(fileHtml, toGroupId);
+        processMsgBox.afterReceiveGroupMsg(fileHtml, toGroupId);
         // 3. 好友列表处理
-        processFriendList.receiving(content, $receiveLi);
+        processFriendList.onReceiving(content, $receiveLi);
     },
 
     remove: function () {
@@ -487,12 +487,12 @@ $('.myfile').on('fileerror', function (event, data, msg) {
 //异步上传返回结果处理
 $(".myfile").on("fileuploaded", function (event, data, previewId, index) {
 
-    // 1. 上传成功1.5秒后自动关闭上传模态框
+    // 1. 上传成功1秒后自动关闭上传模态框
     console.log("fileuploaded");
     setTimeout(function () {
         $('#upload-cancel').trigger('click');
         $('.fileinput-remove').trigger('click');
-    }, 1500);
+    }, 1000);
 
     // 2. 获取、设置参数
     var returnData = data.response.data;
@@ -528,10 +528,10 @@ $(".myfile").on("fileuploaded", function (event, data, previewId, index) {
     }
 
     // 4. 消息框处理：
-    processMsgBox.sendFileMsg(fileHtml, toUserId, toGroupId);
+    processMsgBox.afterSendFileMsg(fileHtml, toUserId, toGroupId);
 
     // 5. 好友列表处理
-    processFriendList.sending(content, $sendLi);
+    processFriendList.afterSendMsg(content, $sendLi);
 });
 
 //上传前
@@ -574,11 +574,11 @@ $('.sendBtn').on('click', function () {
             '</li>';
 
         // 消息框处理：
-        processMsgBox.sendMsg(msg, toUserId, toGroupId)
+        processMsgBox.afterSendMsg(msg, toUserId, toGroupId)
 
         // 好友列表处理：
         var $sendLi = $('.conLeft').find('li.bg');
-        processFriendList.sending(news, $sendLi);
+        processFriendList.afterSendMsg(news, $sendLi);
     }
 });
 
@@ -611,10 +611,10 @@ $('.emjon li').on('click', function () {
         '<div class="news">' + content + '</div>' +
         '<div class="nesHead"><img src="' + avatarUrl + '"/></div>' +
         '</li>';
-    processMsgBox.sendMsg(msg, toUserId, toGroupId);
+    processMsgBox.afterSendMsg(msg, toUserId, toGroupId);
     var $sendLi = $('.conLeft').find('li.bg');
     content = "[emoji]";
-    processFriendList.sending(content, $sendLi);
+    processFriendList.afterSendMsg(content, $sendLi);
 });
 
 function getEmojiHtml(imgSrc) {
@@ -678,12 +678,12 @@ function messageDivClickEvent() {
 // 处理消息框的对象，统一管理相关处理函数，主要包括4个事件函数：
 // (实际上应该有8个事件函数，发送得4个：单发普通信息、群发普通信息、单发文件信息、群发文件信息，
 // 再加上对应的接收4个，但根据实际情况，发现代码可重用，于是便缩减为4个)
-// 1. sendMsg: 发送(单个、群)消息时，调用此函数处理消息框变化；
-// 2. sendFileMsg： 文件上传成功后，发送(单个、群)文件消息时，调用此函数处理消息框变化；
-// 3. receiveSingleMsg： 收到单发(普通对话、文件)消息时，调用此函数处理消息框变化；
-// 4. receiveGroupMsg： 收到群发(普通对话、文件)消息时，调用此函数处理消息框变化。
+// 1. afterSendMsg: 发送(单个、群)消息时，调用此函数处理消息框变化；
+// 2. afterSendFileMsg： 文件上传成功后，发送(单个、群)文件消息时，调用此函数处理消息框变化；
+// 3. afterReceiveSingleMsg： 收到单发(普通对话、文件)消息时，调用此函数处理消息框变化；
+// 4. afterReceiveGroupMsg： 收到群发(普通对话、文件)消息时，调用此函数处理消息框变化。
 var processMsgBox = {
-    sendMsg: function (msg, toUserId, toGroupId) {
+    afterSendMsg: function (msg, toUserId, toGroupId) {
         // 1. 把内容添加到消息框
         $('.newsList').append(msg);
 
@@ -712,13 +712,13 @@ var processMsgBox = {
         $('.RightCont').scrollTop($('.RightCont')[0].scrollHeight);
     },
 
-    sendFileMsg: function (msg, toUserId, toGroupId) {
+    afterSendFileMsg: function (msg, toUserId, toGroupId) {
         // 注意，文件信息消息框不需要计算宽度，已通过css设置好固定的样式
         // 1. 回显发送的新消息
         $('.newsList').append(msg);
 
         // 2. 把消息html标签字符串 添加到已发送用户消息表
-        if (toUserId.length != 0) {
+        if (toUserId.length !== 0) {
             sentMessageMap.get(toUserId).push($('.newsList li').last().prop("outerHTML"));
         } else {
             sentMessageMap.get(toGroupId).push($('.newsList li').last().prop("outerHTML"));
@@ -728,7 +728,7 @@ var processMsgBox = {
         $('.RightCont').scrollTop($('.RightCont')[0].scrollHeight);
     },
 
-    receiveSingleMsg: function (msg, fromUserId) {
+    afterReceiveSingleMsg: function (msg, fromUserId) {
         // 1. 设置消息框可见
         $('.conRight').css("display", "-webkit-box");
 
@@ -770,7 +770,7 @@ var processMsgBox = {
         $('.RightCont').scrollTop($('.RightCont')[0].scrollHeight);
     },
 
-    receiveGroupMsg: function (msg, toGroupId) {
+    afterReceiveGroupMsg: function (msg, toGroupId) {
         // 1. 设置消息框可见
         $('.conRight').css("display", "-webkit-box");
 
@@ -814,7 +814,7 @@ var processMsgBox = {
 }
 
 var processFriendList = {
-    sending: function (content, $sendLi) {
+    afterSendMsg: function (content, $sendLi) {
         // 1. 设置部分新消息提醒
         if (content.length > 8) {
             content = content.substring(0, 8) + "...";
@@ -831,7 +831,7 @@ var processFriendList = {
         $('.conLeft ul li').first().on('click', friendLiClickEvent)
     },
 
-    receiving: function (content, $receiveLi) {
+    onReceiving: function (content, $receiveLi) {
         // 1. 设置红色提醒徽章
         var $badge = $receiveLi.find(".layui-badge");
         if ($badge.length > 0) {
@@ -858,7 +858,7 @@ var processFriendList = {
 
 // 自定义数据结构：已发送用户消息表
 function SentMessageMap() {
-    this.elements = new Array();
+    this.elements = [];
 
     //获取MAP元素个数
     this.size = function () {
@@ -872,7 +872,7 @@ function SentMessageMap() {
 
     //删除MAP所有元素
     this.clear = function () {
-        this.elements = new Array();
+        this.elements = [];
     };
 
     //向MAP中增加元素（key, value)

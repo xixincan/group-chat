@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ROOT-群聊</title>
+    <link rel="icon" href="img/chat.ico" type="image/x-icon"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script type="application/x-javascript">
+        addEventListener("load", function () {
+            setTimeout(hideURLbar, 0);
+        }, false);
+
+        function hideURLbar() {
+            window.scrollTo(0, 1);
+        }
+    </script>
+    <script src="js/common/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" href="css/common/font-awesome.css"/> <!-- Font-Awesome-Icons-CSS -->
+    <link rel="stylesheet" href="css/login.css" type="text/css" media="all"/> <!-- Style-CSS -->
+</head>
+<body>
+<div class="header-w3l">
+    <h1>ROOT聊天室</h1>
+</div>
+<div class="main-content-agile" style="background-color: #F2F2F2">
+    <div class="sub-main-w3">
+        <h2>登录</h2>
+        <form>
+            <div class="icon1">
+                <input placeholder="用户名" id="username" type="text"/>
+            </div>
+
+            <div class="icon2">
+                <input placeholder="密码" id="password" type="password"/>
+            </div>
+
+            <div class="clear"></div>
+            <input id="dologin" type="button" value="登录" onclick="login()"/>
+            <input type="button" value="注册" onclick="register()"/>
+        </form>
+    </div>
+</div>
+<div class="footer">
+    <p style="color:#ffffff">&copy; 2020 ROOT Back-End Vincent, All Rights Reserved </p>
+</div>
+</body>
+<script type="text/javascript" src="js/backgroud.js"></script>
+<script type="text/javascript" src="js/encrypt/encrypt.js"></script>
+<script type="text/javascript">
+    function login() {
+        $.ajax({
+            type: 'POST',
+            url: 'login',
+            // dataType: 'json',
+            // contentType: 'application/json',
+            data: {
+                username: $("#username").val(),
+                password: encrypt($("#password").val())
+            },
+            async: false,
+            success: function (data) {
+                if (data.code === 200) {
+                    window.location.href = "/";
+                } else if (data.code === 500) {
+                    window.location.href = "error/500.html"
+                } else {
+                    alert(data.message);
+                }
+            }
+        });
+    }
+
+    function register() {
+        alert("删库跑路了，暂时注册不了，敬请期待！");
+    }
+
+    // 绑定发送按钮回车事件
+    $('#dologin').keydown(function (e) {
+        // console.log(e.keyCode);
+        if (e.keyCode === 13) {
+            $('#dologin').trigger('click');
+            e.preventDefault(); //屏蔽enter对系统作用。按后增加\r\n等换行
+        }
+    });
+    initPoints(99);
+    drawFrame();
+</script>
+</html>

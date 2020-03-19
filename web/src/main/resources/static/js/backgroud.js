@@ -7,7 +7,7 @@
 //==========================================
 
 // 可调参数
-var BACKGROUND_COLOR = "rgba(0,43,54,1)";   // 背景色
+var BACKGROUND_COLOR = "rgba(0,43,54,0.9)";   // 背景色
 var POINT_COLOR = "rgba(255,255,255,0.7)";  // 点的颜色
 var LINE_LENGTH = 10000;                    // 点之间连线长度(的平方)
 

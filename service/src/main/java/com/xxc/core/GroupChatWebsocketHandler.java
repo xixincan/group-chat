@@ -163,7 +163,7 @@ public class GroupChatWebsocketHandler extends SimpleChannelInboundHandler<TextW
                     break;
                 default:
                     eventType = "读写空闲";
-                    //todo 将用户状态修改为SLEEP状态
+                    //todo 将用户强制下线
                     break;
             }
             StaticLog.info("{}-{}超时事件--{}",

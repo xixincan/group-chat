@@ -91,7 +91,7 @@ public class ChatService implements IChatService {
             this.sendMessage(this.groupChatContext.getLocalChannel(targetUid), messageEntity);
         } else if (this.groupChatContext.isOnBinding(targetUid)) {
             //todo 集群通知
-
+            StaticLog.info("//TODO - 集群通知私聊");
 
         } else if (this.userService.checkUser(targetUid)) {
             //离线状态
@@ -139,7 +139,7 @@ public class ChatService implements IChatService {
                 sentList.add(item);
             } else if (this.groupChatContext.isOnBinding(item)) {
                 //todo 集群通知
-
+                StaticLog.info("//TODO - 集群通知群发");
 
             } else if (this.userService.checkUser(item)) {
                 //记录消息未发送的成员；待上线后发送
@@ -157,12 +157,12 @@ public class ChatService implements IChatService {
 
     @Override
     public void handleSingleSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
-        //TODO
+        this.handleSingleSendMsg(ctx, messageEntity);
     }
 
     @Override
     public void handleGroupSendFile(ChannelHandlerContext ctx, ChatMessageEntity messageEntity) {
-        //TODO
+        this.handlerGroupSendMsg(ctx, messageEntity);
     }
 
     @Override

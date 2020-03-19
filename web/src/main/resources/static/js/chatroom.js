@@ -493,7 +493,10 @@ $(".myfile").on("fileuploaded", function (event, data, previewId, index) {
         $('#upload-cancel').trigger('click');
         $('.fileinput-remove').trigger('click');
     }, 1000);
-
+    if (data.response.code !== 200) {
+        alert(data.response.message);
+        return;
+    }
     // 2. 获取、设置参数
     var returnData = data.response.data;
     var originalFilename = returnData.originalFilename;

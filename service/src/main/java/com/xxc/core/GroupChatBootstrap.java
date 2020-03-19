@@ -74,7 +74,6 @@ public class GroupChatBootstrap {
             ChannelFuture closeFuture = this.serverChannelFuture.channel().closeFuture();
             closeFuture.addListener((GenericFutureListener<? extends Future<? super Void>>) future -> {
                 if (future.isSuccess()) {
-                    this.redisTool.remove(RedisKey.ONLINE_COUNT);
                     StaticLog.info("====>>>>群聊服务关闭<<<<======");
                 }
             });

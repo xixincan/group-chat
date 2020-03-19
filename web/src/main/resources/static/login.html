@@ -7,7 +7,7 @@
     <link rel="icon" href="img/chat.ico" type="image/x-icon"/>
     <script type="application/x-javascript">
         addEventListener("load", function () {
-            setTimeout(hideURLbar, 0);
+            setTimeout(hideURLbar, 10);
         }, false);
 
         function hideURLbar() {
@@ -38,14 +38,15 @@
                 <div class="form">
                     <h2>创建一个账号</h2>
                     <form onsubmit="register();return false;">
-                        <input type="text" name="username" placeholder="用户名" required="required"/>
-                        <input type="password" name="Password" placeholder="密码" required="required"/>
-                        <input type="email" name="Email" placeholder="Email" required="required"/>
-                        <input type="text" name="Phone" placeholder="电话" required="required"/>
+                        <input type="text" name="username" placeholder="用户名(用于登录)" required="required"/>
+                        <input type="password" name="password" placeholder="密码" required="required"/>
+                        <input type="text" name="nickname" placeholder="昵称(聊天显示)" required="required"/>
+                        <input type="email" name="mailbox" placeholder="邮箱" required="required"/>
+                        <input type="text" name="mobile" placeholder="电话(选填)" />
                         <input id="dologin" type="submit" value="注册"/>
                     </form>
                 </div>
-                <div class="cta"><a href="#">忘记密码?</a></div>
+                <div id="fgt" class="cta"><a href="#" onclick="forget()">忘记密码?</a></div>
             </div>
         </div>
     </div>
@@ -57,12 +58,12 @@
     var b = "注册";
     var tip = a;
     $('.toggle').click(function () {
+        $("#fgt").toggle();
         $(".tooltip").hide();
         $(this).children('i').text(tip);
-        var c = a;
-        a = b;
-        b = c;
-        tip = a;
+        tip = b;
+        b = a;
+        a = tip;
         $('.form').animate({
             height: "toggle",
             'padding-top': 'toggle',
@@ -98,6 +99,12 @@
         alert("删库跑路了，暂时注册不了，敬请期待！");
     }
 
+    function forget() {
+        if (!confirm("emmmm…………要不就算了吧")) {
+            alert("删库跑路了, 密码没有了");
+        }
+    }
+
     // 绑定发送按钮回车事件
     $('#dologin').keydown(function (e) {
         // console.log(e.keyCode);
@@ -109,6 +116,9 @@
 
     initPoints(99);
     drawFrame();
+    setTimeout(function () {
+        $(".tooltip").hide();
+    }, 10_000)
 </script>
 <div style="text-align:center;">
     <p style="color:#ffffff">&copy; 2020 ROOT Back-End Vincent, All Rights Reserved </p>

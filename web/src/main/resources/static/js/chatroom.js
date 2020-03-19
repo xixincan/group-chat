@@ -33,7 +33,6 @@ function initUserInfo() {
         async: true,
         success: function (data) {
             if (data.code === 200) {
-                // console.log(data);
                 var userInfo = data.data;
                 userId = userInfo.uid;
                 $("#username").html(userInfo.username);
@@ -74,6 +73,8 @@ function initUserInfo() {
                 $('.conLeft ul li').on('click', friendLiClickEvent);
                 // 绑定输入框以及右侧面板点击事件
                 $('.conRight').on('click', messageDivClickEvent);
+                //默认第一个展开面板
+                $('.conLeft ul li').first().trigger("click");
             } else {
                 alert(data.message);
             }
@@ -454,11 +455,9 @@ function logout() {
         async: true,
         success: function (data) {
             // 3. 注销成功，进行页面跳转
-            console.log("登出成功！");
             window.location.href = data;
         }
     });
-    console.log("登出成功2222！");
     window.location.href = "/login.html";
 }
 

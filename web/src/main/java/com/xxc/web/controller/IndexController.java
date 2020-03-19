@@ -40,14 +40,14 @@ public class IndexController {
             return new MyResult<>(500, result.getAllErrors().get(0).getDefaultMessage());
         }
         this.loginService.doLogin(request, response, userLoginForm);
-        return new MyResult<>("/");
+        return MyResult.success("/");
     }
 
     @ResponseBody
     @PostMapping("logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
+    public MyResult<String> logout(HttpServletRequest request, HttpServletResponse response) {
         this.loginService.logout(request, response);
-        return "/login.html";
+        return  MyResult.success("/login.html");
     }
 
 }

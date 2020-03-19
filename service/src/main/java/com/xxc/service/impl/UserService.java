@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
+import com.xxc.common.util.EncryptUtil;
 import com.xxc.common.util.MyTicketUtil;
 import com.xxc.dao.model.*;
 import com.xxc.entity.enums.UserEventEnum;
@@ -13,14 +14,18 @@ import com.xxc.entity.enums.UserStatusEnum;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.dao.mapper.*;
 import com.xxc.entity.exp.AccessException;
+import com.xxc.entity.request.UserLoginForm;
+import com.xxc.entity.request.UserRegisterForm;
 import com.xxc.entity.response.UserInfo;
 import com.xxc.service.IGroupService;
+import com.xxc.service.ILoginService;
 import com.xxc.service.IUserService;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -38,11 +43,37 @@ public class UserService implements IUserService {
     @Resource
     private IGroupService groupService;
     @Resource
+    private ILoginService loginService;
+    @Resource
     private UserMapper userMapper;
     @Resource
     private UserRelationMapper userRelationMapper;
     @Resource
     private UserLogMapper userLogMapper;
+
+    @Override
+    public User register(HttpServletRequest request, HttpServletResponse response, UserRegisterForm registerForm) {
+        //todo 检测非法字符
+        Example example = new Example(User.class);
+        example.createCriteria().andEqualTo("username", registerForm.getUsername());
+        if (this.userMapper.selectCountByExample(example) > 0) {
+            StaticLog.error("用户名[{}]已经存在", registerForm.getUsername());
+            throw new AccessException("用户名重复");
+        }
+        String uid = EncryptUtil.encodeBase64(registerForm.getUsername());
+        User newUser = new User();
+        newUser.setUid(uid);
+        newUser.setUsername(registerForm.getUsername());
+        newUser.setPassword(registerForm.getPassword());
+        newUser.setNickname(registerForm.getNickname());
+        newUser.setMailbox(registerForm.getMailbox());
+        newUser.setAddress(registerForm.getAddress());
+        newUser.setMobile(registerForm.getMobile());
+        this.userMapper.insertSelective(newUser);
+        StaticLog.info("新用户注册完毕::UID={}", uid);
+        this.loginService.doLogin(request, response, new UserLoginForm(newUser.getUsername(), newUser.getPassword()));
+        return newUser;
+    }
 
     @Override
     public User getUser(String username) {

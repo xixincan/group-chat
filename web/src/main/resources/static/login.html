@@ -38,11 +38,11 @@
                 <div class="form">
                     <h2>创建一个账号</h2>
                     <form onsubmit="register();return false;">
-                        <input type="text" name="username" placeholder="用户名(用于登录)" required="required"/>
-                        <input type="password" name="password" placeholder="密码" required="required"/>
-                        <input type="text" name="nickname" placeholder="昵称(聊天显示)" required="required"/>
-                        <input type="email" name="mailbox" placeholder="邮箱" required="required"/>
-                        <input type="text" name="mobile" placeholder="电话(选填)" />
+                        <input type="text"id="rusername" name="username" placeholder="用户名(用于登录)" required="required"/>
+                        <input type="password" id="rpassword" name="password" placeholder="密码" required="required"/>
+                        <input type="text" id="rnickname" name="nickname" placeholder="昵称(聊天显示)" required="required"/>
+                        <input type="email" id="remail" name="mailbox" placeholder="邮箱" required="required"/>
+                        <input type="text" id="rmobile" name="mobile" placeholder="电话(选填)" />
                         <input id="dologin" type="submit" value="注册"/>
                     </form>
                 </div>
@@ -53,73 +53,7 @@
 </div>
 <script type="text/javascript" src="js/backgroud.js"></script>
 <script type="text/javascript" src="js/encrypt/encrypt.js"></script>
-<script type="text/javascript">
-    var a = "登录";
-    var b = "注册";
-    var tip = a;
-    $('.toggle').click(function () {
-        $("#fgt").toggle();
-        $(".tooltip").hide();
-        $(this).children('i').text(tip);
-        tip = b;
-        b = a;
-        a = tip;
-        $('.form').animate({
-            height: "toggle",
-            'padding-top': 'toggle',
-            'padding-bottom': 'toggle',
-            opacity: "toggle"
-        }, "slow");
-    });
-
-    function login() {
-        $.ajax({
-            type: 'POST',
-            url: 'login',
-            // dataType: 'json',
-            // contentType: 'application/json',
-            data: {
-                username: $("#username").val(),
-                password: encrypt($("#password").val())
-            },
-            async: false,
-            success: function (data) {
-                if (data.code === 200) {
-                    window.location.href = "/";
-                } else if (data.code === 500) {
-                    window.location.href = "error/500.html"
-                } else {
-                    alert(data.message);
-                }
-            }
-        });
-    }
-
-    function register() {
-        alert("删库跑路了，暂时注册不了，敬请期待！");
-    }
-
-    function forget() {
-        if (!confirm("emmmm…………要不就算了吧")) {
-            alert("删库跑路了, 密码没有了");
-        }
-    }
-
-    // 绑定发送按钮回车事件
-    $('#dologin').keydown(function (e) {
-        // console.log(e.keyCode);
-        if (e.keyCode === 13) {
-            $('#dologin').trigger('click');
-            e.preventDefault(); //屏蔽enter对系统作用。按后增加\r\n等换行
-        }
-    });
-
-    initPoints(99);
-    drawFrame();
-    setTimeout(function () {
-        $(".tooltip").hide();
-    }, 10_000)
-</script>
+<script type="text/javascript" src="js/login.js"></script>
 <div style="text-align:center;">
     <p style="color:#ffffff">&copy; 2020 ROOT Back-End Vincent, All Rights Reserved </p>
 </div>

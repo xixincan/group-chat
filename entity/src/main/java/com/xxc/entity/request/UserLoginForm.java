@@ -17,6 +17,14 @@ public class UserLoginForm implements Serializable {
     @NotEmpty(message = "密码不能空")
     private String password;
 
+    public UserLoginForm() {
+    }
+
+    public UserLoginForm(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     public String getUsername() {
         return username;
     }

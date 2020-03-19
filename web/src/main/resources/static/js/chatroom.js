@@ -455,7 +455,7 @@ function logout() {
         async: true,
         success: function (data) {
             // 3. 注销成功，进行页面跳转
-            window.location.href = data;
+            window.location.href = data.data;
         }
     });
     window.location.href = "/login.html";

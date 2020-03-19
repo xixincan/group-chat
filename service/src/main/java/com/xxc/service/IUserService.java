@@ -2,9 +2,11 @@ package com.xxc.service;
 
 import com.xxc.entity.enums.UserEventEnum;
 import com.xxc.dao.model.User;
+import com.xxc.entity.request.UserRegisterForm;
 import com.xxc.entity.response.UserInfo;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.List;
 
@@ -14,6 +16,8 @@ import java.util.List;
  * @Version 1.0
  */
 public interface IUserService {
+
+    User register(HttpServletRequest request, HttpServletResponse response, UserRegisterForm registerForm);
 
     /**
      * 获取用户对象

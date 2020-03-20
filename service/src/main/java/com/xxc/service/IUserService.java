@@ -48,4 +48,10 @@ public interface IUserService {
      * 记录
      */
     void recordUserLog(String uid, HttpServletRequest request, UserEventEnum event);
+
+    List<UserInfo> search(String keyword);
+
+    Boolean buildRelation(HttpServletRequest request, String fuid);
+
+    Boolean destroyRelation(HttpServletRequest request, String fuid);
 }

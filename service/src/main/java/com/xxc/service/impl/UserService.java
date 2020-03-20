@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.log.StaticLog;
+import com.github.pagehelper.PageHelper;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.RedisKey;
 import com.xxc.common.util.EncryptUtil;
@@ -20,6 +21,7 @@ import com.xxc.entity.response.UserInfo;
 import com.xxc.service.IGroupService;
 import com.xxc.service.ILoginService;
 import com.xxc.service.IUserService;
+import org.apache.zookeeper.data.Stat;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -219,4 +221,68 @@ public class UserService implements IUserService {
         this.userLogMapper.insertSelective(userLog);
     }
 
+    @Override
+    public List<UserInfo> search(String keyword) {
+        final ArrayList<UserInfo> resultList = new ArrayList<>();
+        if (StrUtil.isEmpty(keyword)) {
+            return resultList;
+        }
+        String fuzzy = "%" + keyword + "%";
+        Example example = new Example(User.class);
+        example.selectProperties("uid", "username", "nickname", "avatar");
+        Example.Criteria criteria = example.createCriteria().andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
+        example.createCriteria().andLike("nickname", fuzzy).orLike("username", fuzzy);
+        example.and(criteria);
+        //limit 10
+        PageHelper.startPage(1, 10);
+        List<User> userList = this.userMapper.selectByExample(example);
+        if (CollectionUtil.isEmpty(userList)) {
+            return resultList;
+        }
+        userList.forEach(item -> {
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUid(item.getUid());
+            userInfo.setNickname(item.getNickname());
+            userInfo.setAvatar(item.getAvatar());
+            resultList.add(userInfo);
+        });
+        return resultList;
+    }
+
+    @Override
+    public Boolean buildRelation(HttpServletRequest request, String fuid) {
+        if (!this.checkUser(fuid)) {
+            StaticLog.error("目标用户不存在或者不是正常状态fuid={}", fuid);
+            return false;
+        }
+        String uid = MyTicketUtil.getUid(MyTicketUtil.getTicket(request));
+        UserRelation relation = new UserRelation();
+        relation.setUid(uid);
+        relation.setFuid(fuid);
+        relation.setValid(Boolean.TRUE);
+        this.userRelationMapper.insertSelective(relation);
+        StaticLog.info("用户[{}]添加好友[{}]成功", uid, fuid);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean destroyRelation(HttpServletRequest request, String fuid) {
+        String uid = MyTicketUtil.getUid(MyTicketUtil.getTicket(request));
+        Example example = new Example(UserRelation.class);
+        example.selectProperties("id");
+        Example.Criteria criteria = example.createCriteria().andEqualTo("uid", uid).andEqualTo("fuid", fuid).andEqualTo("valid", Boolean.TRUE);
+        example.createCriteria().andEqualTo("fuid", uid).andEqualTo("uid", fuid).andEqualTo("valid", Boolean.TRUE);
+        example.or(criteria);
+        List<UserRelation> relationList = this.userRelationMapper.selectByExample(example);
+        if (CollectionUtil.isNotEmpty(relationList)) {
+            relationList.forEach(item -> {
+                item.setValid(Boolean.FALSE);
+                this.userRelationMapper.updateByPrimaryKeySelective(item);
+            });
+            StaticLog.info("[{}]-[{}]好友关系解除成功", uid, fuid);
+        } else {
+            StaticLog.warn("没有找到[{}]-[{}]好友关系", uid, fuid);
+        }
+        return Boolean.TRUE;
+    }
 }

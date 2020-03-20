@@ -8,13 +8,13 @@ import com.xxc.service.IUserService;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  *
@@ -30,13 +30,11 @@ public class UserController {
     private IUserService userService;
 
     @PostMapping("fetch/info")
-    @ResponseBody
     public MyResult<UserInfo> getUserInfo(HttpServletRequest request) {
         return MyResult.success(this.userService.getSelfUserInfo(request));
     }
 
     @PostMapping("register")
-    @ResponseBody
     public MyResult<String> register(HttpServletRequest request,
                                      HttpServletResponse response,
                                      @Valid UserRegisterForm registerForm,
@@ -46,5 +44,15 @@ public class UserController {
         }
         this.userService.register(request, response, registerForm);
         return MyResult.success("/");
+    }
+
+    @PostMapping("fuzzy/search")
+    public MyResult<List<UserInfo>> search(String keyword) {
+        return MyResult.success(this.userService.search(keyword));
+    }
+
+    @PostMapping("build/friend")
+    public MyResult<Boolean> buildFriend(HttpServletRequest request, String fuid) {
+        return MyResult.success(this.userService.buildRelation(request, fuid));
     }
 }

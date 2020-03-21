@@ -87,7 +87,7 @@ public class LoginService implements ILoginService {
         //设置cookie
         Cookie cookie = new Cookie(RedisKey.TICKET, MyTicketUtil.genTicket(user.getUid()));
         cookie.setPath("/");
-        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setMaxAge(12 * 60 * 60);
         response.addCookie(cookie);
         StaticLog.info("用户登录成功:UID={}", user.getUid());
     }

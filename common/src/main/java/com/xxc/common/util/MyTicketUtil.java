@@ -1,8 +1,8 @@
 package com.xxc.common.util;
 
 import cn.hutool.core.util.StrUtil;
-import com.xxc.common.consts.ConfigKey;
 import com.xxc.common.consts.RedisKey;
+import io.netty.handler.codec.http.FullHttpRequest;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -22,6 +22,20 @@ public class MyTicketUtil {
         for (Cookie cookie : cookies) {
             if (RedisKey.TICKET.equals(cookie.getName())) {
                 return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    public static String getTicket(FullHttpRequest fullHttpRequest) {
+        String cookieStr = fullHttpRequest.headers().get("Cookie");
+        if (StrUtil.isEmpty(cookieStr)) {
+            return null;
+        }
+        String[] cookieArr = cookieStr.split(";");
+        for (String cookie : cookieArr) {
+            if (StrUtil.isNotEmpty(cookie) && cookie.contains(RedisKey.TICKET)) {
+                return cookie.replace(RedisKey.TICKET + "=", "");
             }
         }
         return null;

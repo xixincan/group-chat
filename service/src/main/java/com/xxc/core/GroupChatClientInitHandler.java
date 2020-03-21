@@ -14,7 +14,6 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author xixincan
@@ -26,6 +25,8 @@ public class GroupChatClientInitHandler extends ChannelInitializer<SocketChannel
 
     @Resource
     private IConfigService configService;
+    @Resource
+    private TicketFilterHandler ticketFilterHandler;
     @Resource
     private GroupChatWebsocketHandler groupChatWebsocketHandler;
 
@@ -46,6 +47,8 @@ public class GroupChatClientInitHandler extends ChannelInitializer<SocketChannel
         // 这就是为什么当浏览器发送大量的数据时会发出多个http请求
         // 把HTTP头、HTTP体拼成完整的HTTP请求
         pipeline.addLast(new HttpObjectAggregator(65536));
+        //自定义的登录验证handler
+        pipeline.addLast(this.ticketFilterHandler);
         //对应websocket，它的数据是以帧frame的形式传递
         // 可以看到WebsocketFrame有6个子类(对应由IETF发布的WebSocketRFC定义的6种帧)；TextWebSocketFrame是我们唯一真正需要处理的帧类型。
         // 为了符合 WebSocket RFC，Netty 提供了 WebSocketServerProtocolHandler 来处理其他类型的帧

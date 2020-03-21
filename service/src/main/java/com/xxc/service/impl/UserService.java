@@ -136,6 +136,9 @@ public class UserService implements IUserService {
                 .map(UserRelation::getUid)
                 .collect(Collectors.toSet()));
         uidSet.remove(uid);
+        if (CollectionUtil.isEmpty(uidSet)) {
+            return new ArrayList<>();
+        }
         return this.getUserSimpleInfoList(uidSet);
 //        example.clear();
 //        example.createCriteria().andEqualTo("fuid", uid);
@@ -194,19 +197,21 @@ public class UserService implements IUserService {
     @Override
     public List<UserInfo> getUserSimpleInfoList(Collection<String> uidList) {
         List<UserInfo> userSimpleInfoList = new ArrayList<>();
-        Example example = new Example(User.class);
-        example.selectProperties("uid", "nickname", "avatar", "age", "sex");
-        example.createCriteria().andIn("uid", uidList).andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
-        List<User> userList = this.userMapper.selectByExample(example);
-        if (CollectionUtil.isNotEmpty(userList)) {
-            userList.forEach(item ->
-                    userSimpleInfoList.add(new UserInfo()
-                            .setUid(item.getUid())
-                            .setNickname(item.getNickname())
-                            .setAvatar(item.getAvatar())
-                            .setAge(item.getAge())
-                            .setSex(item.getSex()))
-            );
+        if (CollectionUtil.isNotEmpty(uidList)) {
+            Example example = new Example(User.class);
+            example.selectProperties("uid", "nickname", "avatar", "age", "sex");
+            example.createCriteria().andIn("uid", uidList).andEqualTo("status", UserStatusEnum.NORMAL.getStatus());
+            List<User> userList = this.userMapper.selectByExample(example);
+            if (CollectionUtil.isNotEmpty(userList)) {
+                userList.forEach(item ->
+                        userSimpleInfoList.add(new UserInfo()
+                                .setUid(item.getUid())
+                                .setNickname(item.getNickname())
+                                .setAvatar(item.getAvatar())
+                                .setAge(item.getAge())
+                                .setSex(item.getSex()))
+                );
+            }
         }
         return userSimpleInfoList;
     }

@@ -1,5 +1,6 @@
 package com.xxc.web.controller;
 
+import com.xxc.entity.annotation.SkipLoginCheck;
 import com.xxc.entity.exp.ValidException;
 import com.xxc.entity.request.UserRegisterForm;
 import com.xxc.entity.response.UserInfo;
@@ -34,6 +35,7 @@ public class UserController {
         return MyResult.success(this.userService.getSelfUserInfo(request));
     }
 
+    @SkipLoginCheck
     @PostMapping("register")
     public MyResult<String> register(HttpServletRequest request,
                                      HttpServletResponse response,

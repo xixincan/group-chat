@@ -1,19 +1,14 @@
 # group-chat
 
 #### 介绍
-业余学习自己写的群聊系统
+业余自己写的聊天室
 
 #### 软件架构
 SpringBoot + Netty + Bootstrap
 
 #### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
 #### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  mysql with -init sql-
+2.  reids /redis cluster
+3.  zookeeper（暂未用到）
+4.  rocketmq（暂未用到）

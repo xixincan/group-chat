@@ -125,8 +125,8 @@ public class UserService implements IUserService {
     private List<UserInfo> findFriends(String uid) {
         Example example = new Example(UserRelation.class);
         example.selectProperties("uid", "fuid");
-        Example.Criteria criteria = example.createCriteria().andEqualTo("uid", uid).andEqualTo("valid", Boolean.TRUE);
-        example.createCriteria().andEqualTo("fuid", uid).andEqualTo("valid", Boolean.TRUE);
+        example.createCriteria().andEqualTo("uid", uid).andEqualTo("valid", Boolean.TRUE);
+        Example.Criteria criteria = example.createCriteria().andEqualTo("fuid", uid).andEqualTo("valid", Boolean.TRUE);
         example.or(criteria);
         List<UserRelation> relationList = this.userRelationMapper.selectByExample(example);
         Set<String> uidSet = relationList.stream()

@@ -295,7 +295,7 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML === fromUserId) {
+            if (this.innerHTML == fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 $receiveLi = $(this).parent(".liRight").parent("li");
@@ -332,14 +332,14 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML === fromUserId) {
+            if (this.innerHTML == fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 /* $receiveLi = $(this).parent(".liRight").parent("li"); */
             }
         });
         $('.conLeft').find('span.hidden-groupId').each(function () {
-            if (this.innerHTML === toGroupId) {
+            if (this.innerHTML == toGroupId) {
                 $receiveLi = $(this).parent(".liRight").parent("li");
             }
         });
@@ -366,7 +366,7 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML === fromUserId) {
+            if (this.innerHTML == fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 $receiveLi = $(this).parent(".liRight").parent("li");
@@ -406,14 +406,14 @@ var ws = {
         var fromAvatarUrl;
         var $receiveLi;
         $('.conLeft').find('span.hidden-userId').each(function () {
-            if (this.innerHTML === fromUserId) {
+            if (this.innerHTML == fromUserId) {
                 fromAvatarUrl = $(this).parent(".liRight")
                     .siblings(".liLeft").children('img').attr("src");
                 /* $receiveLi = $(this).parent(".liRight").parent("li"); */
             }
         })
         $('.conLeft').find('span.hidden-groupId').each(function () {
-            if (this.innerHTML === toGroupId) {
+            if (this.innerHTML == toGroupId) {
                 $receiveLi = $(this).parent(".liRight").parent("li");
             }
         })
@@ -533,7 +533,7 @@ $(".myfile").on("fileuploaded", function (event, data, previewId, index) {
     processMsgBox.afterSendFileMsg(fileHtml, toUserId, toGroupId);
 
     // 5. 好友列表处理
-    processFriendList.afterSendMsg(content, $sendLi);
+    processFriendList.onSending(content, $sendLi);
 });
 
 //上传前
@@ -580,7 +580,7 @@ $('.sendBtn').on('click', function () {
 
         // 好友列表处理：
         var $sendLi = $('.conLeft').find('li.bg');
-        processFriendList.afterSendMsg(news, $sendLi);
+        processFriendList.onSending(news, $sendLi);
     }
 });
 
@@ -616,7 +616,7 @@ $('.emjon li').on('click', function () {
     processMsgBox.afterSendMsg(msg, toUserId, toGroupId);
     var $sendLi = $('.conLeft').find('li.bg');
     content = "[emoji]";
-    processFriendList.afterSendMsg(content, $sendLi);
+    processFriendList.onSending(content, $sendLi);
 });
 
 function getEmojiHtml(imgSrc) {
@@ -669,7 +669,7 @@ function friendLiClickEvent() {
 function messageDivClickEvent() {
     let hideID = $('#hideID').text();
     $('.conLeft ul li').find('span.hidden-groupId,span.hidden-userId').each(function() {
-        if (this.innerHTML === hideID) {
+        if (this.innerHTML == hideID) {
             $(this).parent().parent().trigger("click");
             //jquery return false=break, return true=continue;
             return false;
@@ -737,7 +737,7 @@ var processMsgBox = {
         // 2. 把新消息放到暂存区$('.newsList-temp)，如果用户正处于与发出新消息的用户的消息框，则消息要回显
         $('.newsList-temp').append(msg);
         var $focusUserId = $(".conLeft .bg").find('span.hidden-userId');
-        if ($focusUserId.length > 0 && $focusUserId.html() === fromUserId) {
+        if ($focusUserId.length > 0 && $focusUserId.html() == fromUserId) {
             $('.newsList').append(msg);
         }
 
@@ -750,14 +750,14 @@ var processMsgBox = {
         if ($answersDiv.actual('width') < fixWidth) {
             marginRightWidth = maxWidth - $answersDiv.actual('width');
             $answersDiv.css("margin-right", marginRightWidth + "px");
-            if ($focusUserId.length > 0 && $focusUserId.html() === fromUserId) {
+            if ($focusUserId.length > 0 && $focusUserId.html() == fromUserId) {
                 $('.newsList li').last().children("div").first()
                     .css("margin-right", marginRightWidth + "px");
             }
         } else {
             $answersDiv.css("width", fixWidth + "px")
                 .css("margin-right", minMarginRightWidth + "px");
-            if ($focusUserId.length > 0 && $focusUserId.html() === fromUserId) {
+            if ($focusUserId.length > 0 && $focusUserId.html() == fromUserId) {
                 $('.newsList li').last().children("div").first()
                     .css("width", fixWidth + "px")
                     .css("margin-right", minMarginRightWidth + "px");
@@ -779,7 +779,7 @@ var processMsgBox = {
         // 2. 把新消息放到暂存区$('.newsList-temp)，如果用户正处于与发出新消息的用户的消息框，则消息要回显
         $('.newsList-temp').append(msg);
         var $focusGroupId = $(".conLeft .bg").find('span.hidden-groupId');
-        if ($focusGroupId.length > 0 && $focusGroupId.html() === toGroupId) {
+        if ($focusGroupId.length > 0 && $focusGroupId.html() == toGroupId) {
             $('.newsList').append(msg);
         }
 
@@ -792,14 +792,14 @@ var processMsgBox = {
         if ($answersDiv.actual('width') < fixWidth) {
             marginRightWidth = maxWidth - $answersDiv.actual('width');
             $answersDiv.css("margin-right", marginRightWidth + "px");
-            if ($focusGroupId.length > 0 && $focusGroupId.html() === toGroupId) {
+            if ($focusGroupId.length > 0 && $focusGroupId.html() == toGroupId) {
                 $('.newsList li').last().children("div").first()
                     .css("margin-right", marginRightWidth + "px");
             }
         } else {
             $answersDiv.css("width", fixWidth + "px")
                 .css("margin-right", minMarginRightWidth + "px");
-            if ($focusGroupId.length > 0 && $focusGroupId.html() === toGroupId) {
+            if ($focusGroupId.length > 0 && $focusGroupId.html() == toGroupId) {
                 $('.newsList li').last().children("div").first()
                     .css("width", fixWidth + "px")
                     .css("margin-right", minMarginRightWidth + "px");
@@ -816,7 +816,7 @@ var processMsgBox = {
 }
 
 var processFriendList = {
-    afterSendMsg: function (content, $sendLi) {
+    onSending: function (content, $sendLi) {
         // 1. 设置部分新消息提醒
         if (content.length > 8) {
             content = content.substring(0, 8) + "...";

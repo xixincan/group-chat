@@ -21,4 +21,10 @@
     <result column="updated" jdbcType="TIMESTAMP" property="updated" />
     <result column="created" jdbcType="TIMESTAMP" property="created" />
   </resultMap>
+  <update id="addAge" parameterType="long" >
+    update `user`
+    set age = age + 1
+    where id=#{id}
+  </update>
+
 </mapper>

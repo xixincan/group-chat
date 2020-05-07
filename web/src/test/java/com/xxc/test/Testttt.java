@@ -2,6 +2,7 @@ package com.xxc.test;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.xxc.common.cache.RedisTool;
 import com.xxc.common.consts.ConfigKey;
 import com.xxc.dao.mapper.MsgLogMapper;
@@ -112,5 +113,16 @@ public class Testttt {
         this.userMsgMapper.insertSelective(userMsg);
         this.userMsgMapper.insertList(list); //error
     }
+
+    @Test
+    public void sfa() {
+        User admin = this.userService.getUser("admin");
+        System.out.println(JSON.toJSONString(admin));
+        System.out.println(admin.getAge());
+        this.userService.addAge(admin.getId().longValue());
+        System.out.println(JSON.toJSONString(admin));
+        System.out.println(admin.getAge());
+    }
+
 
 }

@@ -290,4 +290,8 @@ public class UserService implements IUserService {
         }
         return Boolean.TRUE;
     }
+
+    public void addAge(Long id) {
+        this.userMapper.addAge(id);
+    }
 }

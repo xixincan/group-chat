@@ -7,12 +7,17 @@ import com.xxc.dao.mapper.UserRelationMapper;
 import com.xxc.dao.model.GroupRelation;
 import com.xxc.dao.model.User;
 import com.xxc.dao.model.UserRelation;
+import com.xxc.entity.exp.BizException;
 import com.xxc.service.ITranService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author xixincan
@@ -47,10 +52,41 @@ public class TranService implements ITranService {
         }
         example.clear();;
         example = new Example(GroupRelation.class);
+        example.createCriteria().andEqualTo("uid", uid);
         List<GroupRelation> groupRelations = this.groupRelationMapper.selectByExample(example);
         if (groupRelations.size() <= 0) {
             StaticLog.warn("没有找到uid={}的用户组关系", uid);
         }
         StaticLog.info("-----transGet查询完毕-------");
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.SUPPORTS, isolation = Isolation.READ_UNCOMMITTED)
+    public void transGetAsync(String uid) {
+        Example example = new Example(User.class);
+        example.createCriteria().andEqualTo("uid", uid);
+        List<User> users = this.userMapper.selectByExample(example);
+        if (users.size() <= 0) {
+            StaticLog.warn("async没有找到uid={}的用户", uid);
+            throw new BizException("none");
+        }
+        CompletableFuture<Void> userF = CompletableFuture.runAsync(() -> {
+            Example example1 = new Example(UserRelation.class);
+            example1.createCriteria().andEqualTo("uid", uid);
+            List<UserRelation> userRelations = this.userRelationMapper.selectByExample(example1);
+            if (userRelations.size() <= 0) {
+                StaticLog.warn("async没有找到uid={}的用关系", uid);
+            }
+        });
+        CompletableFuture<Void> groupF = CompletableFuture.runAsync(() -> {
+            Example example1 = new Example(GroupRelation.class);
+            example1.createCriteria().andEqualTo("uid", uid);
+            List<GroupRelation> groupRelations = this.groupRelationMapper.selectByExample(example1);
+            if (groupRelations.size() <= 0) {
+                StaticLog.warn("async没有找到uid={}的用户组关系", uid);
+            }
+        });
+        CompletableFuture.allOf(userF, groupF).join();
+        StaticLog.info("======async end======");
     }
 }

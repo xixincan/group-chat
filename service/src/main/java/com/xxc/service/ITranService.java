@@ -9,4 +9,6 @@ public interface ITranService {
 
     void transGet(String uid);
 
+    void transGetAsync(String uid);
+
 }

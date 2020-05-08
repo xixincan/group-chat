@@ -25,7 +25,11 @@ import com.xxc.service.ITranService;
 import com.xxc.service.IUserService;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
@@ -302,11 +306,11 @@ public class UserService implements IUserService {
     private ITranService tranService;
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
     public Boolean testTransaction(UserRegisterForm registerForm) {
         User user =  new User();
         user.setUid(EncryptUtil.genRandomID());
-        user.setUsername(registerForm.getUsername());
+        user.setUsername(registerForm.getUsername() + System.currentTimeMillis());
         user.setPassword(registerForm.getPassword());
         user.setNickname(registerForm.getNickname());
         user.setAvatar(registerForm.getAddress());
@@ -321,6 +325,13 @@ public class UserService implements IUserService {
             StaticLog.error(e);
         }
         this.tranService.transGet(user.getUid());
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                tranService.transGetAsync(user.getUid());
+            }
+        });
 
         return Boolean.TRUE;
     }

@@ -54,4 +54,6 @@ public interface IUserService {
     Boolean buildRelation(HttpServletRequest request, String fuid);
 
     Boolean destroyRelation(HttpServletRequest request, String fuid);
+
+    Boolean testTransaction(UserRegisterForm registerForm);
 }

@@ -15,14 +15,17 @@ import com.xxc.entity.enums.UserStatusEnum;
 import com.xxc.common.util.MyIPUtil;
 import com.xxc.dao.mapper.*;
 import com.xxc.entity.exp.AccessException;
+import com.xxc.entity.exp.BizException;
 import com.xxc.entity.request.UserLoginForm;
 import com.xxc.entity.request.UserRegisterForm;
 import com.xxc.entity.response.UserInfo;
 import com.xxc.service.IGroupService;
 import com.xxc.service.ILoginService;
+import com.xxc.service.ITranService;
 import com.xxc.service.IUserService;
 import org.apache.zookeeper.data.Stat;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
@@ -293,5 +296,43 @@ public class UserService implements IUserService {
 
     public void addAge(Long id) {
         this.userMapper.addAge(id);
+    }
+
+    @Resource
+    private ITranService tranService;
+
+    @Override
+    @Transactional
+    public Boolean testTransaction(UserRegisterForm registerForm) {
+        User user =  new User();
+        user.setUid(EncryptUtil.genRandomID());
+        user.setUsername(registerForm.getUsername());
+        user.setPassword(registerForm.getPassword());
+        user.setNickname(registerForm.getNickname());
+        user.setAvatar(registerForm.getAddress());
+        user.setMailbox(registerForm.getMailbox());
+        this.addUser(user);
+        this.addUserRelation(user.getUid());
+        this.addGroupRelation(user.getUid());
+
+        this.tranService.transGet(user.getUid());
+
+        return Boolean.TRUE;
+    }
+
+    private void addGroupRelation(String uid) {
+
+    }
+
+    private void addUserRelation(String uid) {
+
+    }
+
+    private void addUser(User user) {
+        int i = this.userMapper.insertSelective(user);
+        if (i <= 0) {
+            StaticLog.warn("保存用户失败");
+            throw new BizException("保存用户失败");
+        }
     }
 }

@@ -117,4 +117,9 @@ public class GroupService implements IGroupService {
         List<String> uidList = groupRelations.stream().map(GroupRelation::getUid).collect(Collectors.toList());
         return this.userService.getUserSimpleInfoList(uidList);
     }
+
+    @Override
+    public int addGroup(GroupRelation groupRelation) {
+        return this.groupRelationMapper.insertSelective(groupRelation);
+    }
 }

@@ -1,5 +1,6 @@
 package com.xxc.service;
 
+import com.xxc.dao.model.GroupRelation;
 import com.xxc.entity.response.GroupInfo;
 import com.xxc.entity.response.UserInfo;
 
@@ -18,4 +19,5 @@ public interface IGroupService {
 
     List<UserInfo> findGroupMembers(Integer gid);
 
+    int addGroup(GroupRelation groupRelation);
 }

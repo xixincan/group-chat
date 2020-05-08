@@ -315,24 +315,51 @@ public class UserService implements IUserService {
         this.addUserRelation(user.getUid());
         this.addGroupRelation(user.getUid());
 
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            StaticLog.error(e);
+        }
         this.tranService.transGet(user.getUid());
 
         return Boolean.TRUE;
     }
 
     private void addGroupRelation(String uid) {
-
+        GroupRelation groupRelation = new GroupRelation();
+        groupRelation.setGid(new Random().nextInt(100));
+        groupRelation.setUid(uid);
+        groupRelation.setValid(Boolean.TRUE);
+        int i = this.groupService.addGroup(groupRelation);
+        if (i > 0) {
+            StaticLog.info("插入组关系成功");
+        } else {
+            StaticLog.error("插入组关系失败");
+            throw new BizException("插入组关系失败");
+        }
     }
 
     private void addUserRelation(String uid) {
-
+        UserRelation userRelation = new UserRelation();
+        userRelation.setValid(Boolean.TRUE);
+        userRelation.setUid(uid);
+        userRelation.setFuid(EncryptUtil.genRandomID());
+        int i = this.userRelationMapper.insertSelective(userRelation);
+        if (i > 0) {
+            StaticLog.info("插入用户关系成功");
+        } else {
+            StaticLog.error("插入用户关系失败");
+            throw new BizException("插入用户关系失败");
+        }
     }
 
     private void addUser(User user) {
         int i = this.userMapper.insertSelective(user);
         if (i <= 0) {
-            StaticLog.warn("保存用户失败");
+            StaticLog.error("保存用户失败");
             throw new BizException("保存用户失败");
+        } else {
+            StaticLog.info("保存用户成功");
         }
     }
 }

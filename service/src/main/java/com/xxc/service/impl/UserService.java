@@ -23,7 +23,6 @@ import com.xxc.service.IGroupService;
 import com.xxc.service.ILoginService;
 import com.xxc.service.ITranService;
 import com.xxc.service.IUserService;
-import org.apache.zookeeper.data.Stat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -320,18 +319,18 @@ public class UserService implements IUserService {
         this.addGroupRelation(user.getUid());
 
         try {
-            Thread.sleep(2000L);
+            Thread.sleep(2L);
         } catch (InterruptedException e) {
             StaticLog.error(e);
         }
         this.tranService.transGet(user.getUid());
-
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                tranService.transGetAsync(user.getUid());
-            }
-        });
+        tranService.transGetAsync(user.getUid());
+//        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+//            @Override
+//            public void afterCommit() {
+//                tranService.transGetAsync(user.getUid());
+//            }
+//        });
 
         return Boolean.TRUE;
     }

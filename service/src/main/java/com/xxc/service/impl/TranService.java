@@ -17,7 +17,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 /**
  * @author xixincan
@@ -60,8 +60,10 @@ public class TranService implements ITranService {
         StaticLog.info("-----transGet查询完毕-------");
     }
 
+    static ExecutorService service = new ThreadPoolExecutor(1, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>(128));
+
     @Override
-    @Transactional(propagation = Propagation.SUPPORTS, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(propagation = Propagation.NESTED, isolation = Isolation.READ_UNCOMMITTED, readOnly = true)
     public void transGetAsync(String uid) {
         Example example = new Example(User.class);
         example.createCriteria().andEqualTo("uid", uid);
@@ -70,14 +72,19 @@ public class TranService implements ITranService {
             StaticLog.warn("async没有找到uid={}的用户", uid);
             throw new BizException("none");
         }
-        CompletableFuture<Void> userF = CompletableFuture.runAsync(() -> {
-            Example example1 = new Example(UserRelation.class);
-            example1.createCriteria().andEqualTo("uid", uid);
-            List<UserRelation> userRelations = this.userRelationMapper.selectByExample(example1);
-            if (userRelations.size() <= 0) {
-                StaticLog.warn("async没有找到uid={}的用关系", uid);
-            }
-        });
+        CompletableFuture<Void> userF = CompletableFuture.runAsync(
+                new Runnable() {
+                    @Override
+                    @Transactional(propagation = Propagation.NESTED, isolation = Isolation.READ_UNCOMMITTED, readOnly = true)
+                    public void run() {
+                        Example example1 = new Example(UserRelation.class);
+                        example1.createCriteria().andEqualTo("uid", uid);
+                        List<UserRelation> userRelations = userRelationMapper.selectByExample(example1);
+                        if (userRelations.size() <= 0) {
+                            StaticLog.warn("async没有找到uid={}的用关系", uid);
+                        }
+                    }
+                }, service);
         CompletableFuture<Void> groupF = CompletableFuture.runAsync(() -> {
             Example example1 = new Example(GroupRelation.class);
             example1.createCriteria().andEqualTo("uid", uid);
@@ -85,7 +92,7 @@ public class TranService implements ITranService {
             if (groupRelations.size() <= 0) {
                 StaticLog.warn("async没有找到uid={}的用户组关系", uid);
             }
-        });
+        }, service);
         CompletableFuture.allOf(userF, groupF).join();
         StaticLog.info("======async end======");
     }

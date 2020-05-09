@@ -28,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class WebAspect {
 
-    private Stopwatch stopWatch = Stopwatch.createUnstarted();
-
     /**
      * 切面
      */
@@ -45,18 +43,19 @@ public class WebAspect {
         StaticLog.debug("method invoke: {}", method.getName());
 
         Object proceed;
-        this.stopWatch.start();
+        Stopwatch stopWatch = Stopwatch.createUnstarted();
+        stopWatch.start();
         try {
             proceed = joinPoint.proceed();
         } catch (Throwable throwable) {
-            this.stopWatch.reset();
+            stopWatch.reset();
             StaticLog.error(throwable);
             //将错误统一封装
             return MyResult.error(9999, throwable.getMessage(), throwable);
         }
-        this.stopWatch.stop();
-        StaticLog.debug("耗时:{}ms; method return: {}", this.stopWatch.elapsed(TimeUnit.MILLISECONDS), JSONUtil.toJsonStr(proceed));
-        this.stopWatch.reset();
+        stopWatch.stop();
+        StaticLog.debug("耗时:{}ms; method return: {}", stopWatch.elapsed(TimeUnit.MILLISECONDS), JSONUtil.toJsonStr(proceed));
+        stopWatch.reset();
         return proceed;
     }
 

@@ -303,7 +303,7 @@ public class UserService implements IUserService {
 
     @Resource
     private ITranService tranService;
-
+    private String uid;
     @Override
     @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
     public Boolean testTransaction(UserRegisterForm registerForm) {
@@ -317,9 +317,9 @@ public class UserService implements IUserService {
         this.addUser(user);
         this.addUserRelation(user.getUid());
         this.addGroupRelation(user.getUid());
-
+        uid = user.getUid();
         try {
-            Thread.sleep(2L);
+            Thread.sleep(20000L);
         } catch (InterruptedException e) {
             StaticLog.error(e);
         }
@@ -333,6 +333,14 @@ public class UserService implements IUserService {
 //        });
 
         return Boolean.TRUE;
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, propagation = Propagation.REQUIRES_NEW)
+    public User testTransactionGet(String uid) {
+        this.tranService.transGet(this.uid);
+        tranService.transGetAsync(this.uid);
+        return null;
     }
 
     private void addGroupRelation(String uid) {

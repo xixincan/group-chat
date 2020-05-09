@@ -50,7 +50,8 @@ public class TranService implements ITranService {
         if (userRelations.size() <= 0) {
             StaticLog.warn("没有找到uid={}的用关系", uid);
         }
-        example.clear();;
+        example.clear();
+        ;
         example = new Example(GroupRelation.class);
         example.createCriteria().andEqualTo("uid", uid);
         List<GroupRelation> groupRelations = this.groupRelationMapper.selectByExample(example);
@@ -63,7 +64,6 @@ public class TranService implements ITranService {
     static ExecutorService service = new ThreadPoolExecutor(1, 2, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>(128));
 
     @Override
-    @Transactional(propagation = Propagation.NESTED, isolation = Isolation.READ_UNCOMMITTED, readOnly = true)
     public void transGetAsync(String uid) {
         Example example = new Example(User.class);
         example.createCriteria().andEqualTo("uid", uid);
@@ -72,19 +72,16 @@ public class TranService implements ITranService {
             StaticLog.warn("async没有找到uid={}的用户", uid);
             throw new BizException("none");
         }
-        CompletableFuture<Void> userF = CompletableFuture.runAsync(
-                new Runnable() {
-                    @Override
-                    @Transactional(propagation = Propagation.NESTED, isolation = Isolation.READ_UNCOMMITTED, readOnly = true)
-                    public void run() {
-                        Example example1 = new Example(UserRelation.class);
-                        example1.createCriteria().andEqualTo("uid", uid);
-                        List<UserRelation> userRelations = userRelationMapper.selectByExample(example1);
-                        if (userRelations.size() <= 0) {
-                            StaticLog.warn("async没有找到uid={}的用关系", uid);
-                        }
-                    }
-                }, service);
+
+        CompletableFuture<Void> userF = CompletableFuture.runAsync(() -> {
+            Example example1 = new Example(UserRelation.class);
+            example1.createCriteria().andEqualTo("uid", uid);
+            List<UserRelation> userRelations = userRelationMapper.selectByExample(example1);
+            if (userRelations.size() <= 0) {
+                StaticLog.warn("async没有找到uid={}的用关系", uid);
+            }
+        }, service);
+
         CompletableFuture<Void> groupF = CompletableFuture.runAsync(() -> {
             Example example1 = new Example(GroupRelation.class);
             example1.createCriteria().andEqualTo("uid", uid);

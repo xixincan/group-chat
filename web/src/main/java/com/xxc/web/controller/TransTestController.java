@@ -1,5 +1,6 @@
 package com.xxc.web.controller;
 
+import com.xxc.dao.model.User;
 import com.xxc.entity.annotation.SkipLoginCheck;
 import com.xxc.entity.request.UserRegisterForm;
 import com.xxc.entity.result.MyResult;
@@ -25,6 +26,13 @@ public class TransTestController {
     @ResponseBody
     public MyResult<Boolean> testTransaction(@RequestBody UserRegisterForm registerForm) {
         return MyResult.success(this.userService.testTransaction(registerForm));
+    }
+
+    @SkipLoginCheck
+    @GetMapping("get")
+    @ResponseBody
+    public MyResult<User> testTransaction(String uid) {
+        return MyResult.success(this.userService.testTransactionGet(uid));
     }
 
 }
